@@ -1,2 +1,3 @@
-node_modules/
-dist/
+/.direnv/
+/node_modules/
+/dist/
