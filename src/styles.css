@@ -125,7 +125,7 @@ body {
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;
-  padding-bottom: 6rem;
+  padding-bottom: 8rem;
 }
 
 .footer {
@@ -342,7 +342,7 @@ body {
 /* Floating Actions */
 .floating-actions {
   position: fixed;
-  bottom: 3.5rem;
+  bottom: 5rem;
   right: 2rem;
   display: flex;
   flex-direction: column;
@@ -753,7 +753,6 @@ body {
   font-weight: 700;
   color: var(--text-primary);
   font-family: var(--font-nums);
-  font-family: var(--font-nums);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1055,7 +1054,6 @@ body {
 }
 
 .time-bar-value {
-  font-family: var(--font-nums);
   font-family: var(--font-nums);
   font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
@@ -1526,6 +1524,12 @@ body {
 
   .main {
     padding: 1rem;
+    padding-bottom: 6rem;
+  }
+
+  .floating-actions {
+    bottom: 4rem;
+    right: 1rem;
   }
 
   .dashboard-grid {
