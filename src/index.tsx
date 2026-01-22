@@ -6,6 +6,17 @@ import { StatsData, ComparisonEntry } from './utils/types';
 import { parseStats } from './utils/formatters';
 import './styles.css';
 
+function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
+  fn: T,
+  delay: number,
+): (...args: Parameters<T>) => void {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+}
+
 const Analysis = lazy(() => import('./components/Analysis'));
 const ComparisonView = lazy(() => import('./components/ComparisonView'));
 
@@ -64,6 +75,31 @@ function App() {
     };
   });
 
+  // Debounced save to localStorage
+  const saveToStorage = debounce(
+    (
+      stats: StatsData | null,
+      raw: Record<string, unknown> | null,
+      snaps: ComparisonEntry[],
+      v: 'analysis' | 'compare',
+    ) => {
+      try {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({
+            snapshots: snaps,
+            currentStats: stats,
+            currentRaw: raw,
+            view: v,
+          }),
+        );
+      } catch (e) {
+        console.warn('Failed to save data:', e);
+      }
+    },
+    500,
+  );
+
   // Save to localStorage on any change
   createEffect(() => {
     const stats = currentStats();
@@ -71,22 +107,9 @@ function App() {
     const snaps = snapshots();
     const v = view();
 
-    // Don't save while still loading initial data
     if (isLoading()) return;
 
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          snapshots: snaps,
-          currentStats: stats,
-          currentRaw: raw,
-          view: v,
-        }),
-      );
-    } catch (e) {
-      console.warn('Failed to save data:', e);
-    }
+    saveToStorage(stats, raw, snaps, v);
   });
 
   const saveSnapshot = () => {
