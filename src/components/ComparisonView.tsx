@@ -47,24 +47,42 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
     }));
 
     return fields.map(field => {
-      const getValue = (data: ComparisonEntry['data']) => {
+      const getValue = (
+        data: ComparisonEntry['data'],
+        raw: Record<string, unknown>,
+      ): { value: number; present: boolean } => {
         const keys = field.key.split('.');
         let value: unknown = data;
         for (const k of keys) value = value && (value as Record<string, unknown>)?.[k];
-        return typeof value === 'number' ? value : 0;
+
+        let present = typeof value === 'number';
+        if (!present) {
+          present =
+            keys.reduce((obj: unknown, k: string) => {
+              if (obj && typeof obj === 'object' && k in (obj as Record<string, unknown>)) {
+                const nested = (obj as Record<string, unknown>)[k];
+                return typeof nested === 'object' && nested !== null ? nested : true;
+              }
+              return undefined;
+            }, raw as unknown) !== undefined;
+        }
+
+        return { value: typeof value === 'number' ? value : 0, present };
       };
 
-      const leftVal = getValue(left.data);
-      const rightVal = getValue(right.data);
-      const change = calculateChange(rightVal, leftVal);
+      const leftVal = getValue(left.data, left.raw);
+      const rightVal = getValue(right.data, right.raw);
+      const change = calculateChange(rightVal.value, leftVal.value);
+      const isMissing = !leftVal.present || !rightVal.present;
 
       return {
         ...field,
-        leftValue: leftVal,
-        rightValue: rightVal,
+        leftValue: leftVal.value,
+        rightValue: rightVal.value,
         change: change.percent,
         isReduction: change.isReduction,
-        isDifferent: leftVal !== rightVal,
+        isDifferent: leftVal.value !== rightVal.value,
+        isMissing,
       };
     });
   });
@@ -136,40 +154,68 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
           </div>
           <For each={comparison()}>
             {row => (
-              <div class={`compare-row ${row.isDifferent ? 'diff' : ''}`}>
+              <div
+                class={`compare-row ${row.isDifferent ? 'diff' : ''} ${row.isMissing ? 'missing' : ''}`}
+              >
                 <div class="col-label" title={row.label}>
                   {row.label}
                 </div>
                 <div class="col-value">
-                  {row.format === 'bytes'
-                    ? formatBytes(row.leftValue)
-                    : row.format === 'time'
-                      ? formatTime(row.leftValue)
-                      : row.format === 'percent'
-                        ? formatPercent(row.leftValue)
-                        : formatNumber(row.leftValue)}
+                  <Show
+                    when={row.isMissing}
+                    fallback={
+                      row.format === 'bytes'
+                        ? formatBytes(row.leftValue)
+                        : row.format === 'time'
+                          ? formatTime(row.leftValue)
+                          : row.format === 'percent'
+                            ? formatPercent(row.leftValue)
+                            : formatNumber(row.leftValue)
+                    }
+                  >
+                    <span class="missing-value">N/A</span>
+                  </Show>
                 </div>
                 <div class="col-value">
-                  {row.format === 'bytes'
-                    ? formatBytes(row.rightValue)
-                    : row.format === 'time'
-                      ? formatTime(row.rightValue)
-                      : row.format === 'percent'
-                        ? formatPercent(row.rightValue)
-                        : formatNumber(row.rightValue)}
+                  <Show
+                    when={row.isMissing}
+                    fallback={
+                      row.format === 'bytes'
+                        ? formatBytes(row.rightValue)
+                        : row.format === 'time'
+                          ? formatTime(row.rightValue)
+                          : row.format === 'percent'
+                            ? formatPercent(row.rightValue)
+                            : formatNumber(row.rightValue)
+                    }
+                  >
+                    <span class="missing-value">N/A</span>
+                  </Show>
                 </div>
                 <div
-                  class={`col-change ${row.isReduction ? 'good' : row.isDifferent ? 'bad' : ''}`}
+                  class={`col-change ${row.isReduction ? 'good' : row.isDifferent && !row.isMissing ? 'bad' : ''}`}
                 >
-                  <Show when={row.isDifferent} fallback={<span class="neutral">—</span>}>
-                    <span class="change-value">
-                      <Show when={row.isReduction}>
-                        <ArrowDown size={14} />
+                  <Show
+                    when={row.isMissing}
+                    fallback={
+                      <Show when={row.isDifferent} fallback={<span class="neutral">—</span>}>
+                        <span class="change-value">
+                          <Show when={row.isReduction}>
+                            <ArrowDown size={14} />
+                          </Show>
+                          <Show when={!row.isReduction}>
+                            <ArrowUp size={14} />
+                          </Show>
+                          {Math.abs(row.change).toFixed(1)}%
+                        </span>
                       </Show>
-                      <Show when={!row.isReduction}>
-                        <ArrowUp size={14} />
-                      </Show>
-                      {Math.abs(row.change).toFixed(1)}%
+                    }
+                  >
+                    <span
+                      class="missing-indicator"
+                      title="Field not available in one or both implementations"
+                    >
+                      N/A
                     </span>
                   </Show>
                 </div>

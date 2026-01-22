@@ -11,6 +11,7 @@ const ComparisonView = lazy(() => import('./components/ComparisonView'));
 
 function App() {
   const [currentStats, setCurrentStats] = createSignal<StatsData | null>(null);
+  const [currentRaw, setCurrentRaw] = createSignal<Record<string, unknown> | null>(null);
   const [snapshots, setSnapshots] = createSignal<ComparisonEntry[]>([]);
   const [view, setView] = createSignal<'analysis' | 'compare'>('analysis');
   const [snapshotName, setSnapshotName] = createSignal('');
@@ -28,10 +29,18 @@ function App() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed.snapshots)) {
-          setSnapshots(parsed.snapshots);
+          setSnapshots(
+            parsed.snapshots.map((s: ComparisonEntry) => ({
+              ...s,
+              raw: s.raw || {},
+            })),
+          );
         }
         if (parsed.currentStats) {
           setCurrentStats(parsed.currentStats);
+        }
+        if (parsed.currentRaw) {
+          setCurrentRaw(parsed.currentRaw);
         }
         if (parsed.view) {
           setView(parsed.view);
@@ -58,6 +67,7 @@ function App() {
   // Save to localStorage on any change
   createEffect(() => {
     const stats = currentStats();
+    const raw = currentRaw();
     const snaps = snapshots();
     const v = view();
 
@@ -70,6 +80,7 @@ function App() {
         JSON.stringify({
           snapshots: snaps,
           currentStats: stats,
+          currentRaw: raw,
           view: v,
         }),
       );
@@ -80,12 +91,14 @@ function App() {
 
   const saveSnapshot = () => {
     const stats = currentStats();
-    if (!stats) return;
+    const raw = currentRaw();
+    if (!stats || !raw) return;
     const name = snapshotName().trim() || `Snapshot ${snapshots().length + 1}`;
     const entry: ComparisonEntry = {
       id: Date.now(),
       name,
       data: stats,
+      raw,
       timestamp: new Date(),
     };
     setSnapshots(prev => [...prev, entry]);
@@ -109,15 +122,18 @@ function App() {
     setShowManageSnapshots(false);
   };
 
-  const handleFileLoad = (data: StatsData) => {
+  const handleFileLoad = (data: StatsData, raw: Record<string, unknown>) => {
     setCurrentStats(data);
+    setCurrentRaw(raw);
     setView('analysis');
   };
 
   const loadFromText = (text: string) => {
     try {
-      const data = parseStats(JSON.parse(text));
+      const raw = JSON.parse(text);
+      const data = parseStats(raw);
       setCurrentStats(data);
+      setCurrentRaw(raw);
     } catch (e) {
       console.error('Failed to parse stats:', e);
     }

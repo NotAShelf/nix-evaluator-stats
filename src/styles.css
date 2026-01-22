@@ -1420,6 +1420,15 @@ body {
   background: var(--bg-tertiary);
 }
 
+.compare-row.missing {
+  opacity: 0.6;
+  background: var(--bg-secondary);
+}
+
+.compare-row.missing:hover {
+  background: var(--bg-tertiary);
+}
+
 .compare-row .col-label {
   font-size: 0.8125rem;
   color: var(--text-primary);
@@ -1463,6 +1472,25 @@ body {
 
 .col-change .neutral {
   color: var(--text-muted);
+}
+
+.missing-value {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.missing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-nums);
+  font-variant-numeric: tabular-nums;
+  background: rgba(156, 163, 175, 0.15);
+  color: var(--text-tertiary);
 }
 
 .comparison-summary {

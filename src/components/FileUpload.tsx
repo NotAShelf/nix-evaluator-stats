@@ -3,7 +3,7 @@ import { StatsData } from '../utils/types';
 import { BarChart2 } from 'lucide-solid';
 
 interface FileUploadProps {
-  onFileLoad: (data: StatsData) => void;
+  onFileLoad: (data: StatsData, raw: Record<string, unknown>) => void;
   onTextLoad: (text: string) => void;
   showHelp: boolean;
   onToggleHelp: () => void;
@@ -22,7 +22,7 @@ export default function FileUpload(props: FileUploadProps) {
     try {
       const text = await file.text();
       const json = JSON.parse(text);
-      props.onFileLoad(json);
+      props.onFileLoad(json, json);
     } catch {
       setError('Invalid JSON file');
     }

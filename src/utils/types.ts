@@ -80,5 +80,6 @@ export interface ComparisonEntry {
   id: number;
   name: string;
   data: StatsData;
+  raw: Record<string, unknown>;
   timestamp: Date;
 }
