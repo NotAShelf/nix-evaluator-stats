@@ -297,6 +297,55 @@ body {
   font-size: 0.875rem;
 }
 
+.recent-analyses {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.recent-analyses h3 {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.snapshot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.snapshot-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.snapshot-item:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent);
+}
+
+.snapshot-item .snapshot-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.snapshot-item .snapshot-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 .quick-tips {
   background: var(--card-bg);
   border: 1px solid var(--border-color);

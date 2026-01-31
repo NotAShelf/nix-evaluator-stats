@@ -1,4 +1,4 @@
-import { createSignal, Show, For, onMount, createEffect, Suspense, lazy } from 'solid-js';
+import { createSignal, Show, For, onMount, createEffect, lazy } from 'solid-js';
 import { render } from 'solid-js/web';
 import { Github, Save, Upload, Trash2, X } from 'lucide-solid';
 import FileUpload from './components/FileUpload';
@@ -206,6 +206,8 @@ function App() {
                 onTextLoad={loadFromText}
                 showHelp={showHelp()}
                 onToggleHelp={() => setShowHelp(!showHelp())}
+                snapshots={snapshots()}
+                onLoadSnapshot={loadSnapshot}
               />
             </Show>
             <Show when={currentStats()}>

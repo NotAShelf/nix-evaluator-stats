@@ -1,12 +1,14 @@
-import { createSignal, Show } from 'solid-js';
-import { StatsData } from '../utils/types';
-import { BarChart2 } from 'lucide-solid';
+import { createSignal, Show, For } from 'solid-js';
+import { StatsData, ComparisonEntry } from '../utils/types';
+import { BarChart2, Clock } from 'lucide-solid';
 
 interface FileUploadProps {
   onFileLoad: (data: StatsData, raw: Record<string, unknown>) => void;
   onTextLoad: (text: string) => void;
   showHelp: boolean;
   onToggleHelp: () => void;
+  snapshots?: ComparisonEntry[];
+  onLoadSnapshot?: (entry: ComparisonEntry) => void;
 }
 
 export default function FileUpload(props: FileUploadProps) {
@@ -90,6 +92,27 @@ export default function FileUpload(props: FileUploadProps) {
 
         <Show when={error()}>
           <div class="error">{error()}</div>
+        </Show>
+
+        <Show when={props.snapshots && props.snapshots.length > 0}>
+          <div class="recent-analyses">
+            <h3>
+              <Clock size={16} />
+              Recent Analyses
+            </h3>
+            <div class="snapshot-list">
+              <For each={props.snapshots}>
+                {entry => (
+                  <div class="snapshot-item" onClick={() => props.onLoadSnapshot?.(entry)}>
+                    <span class="snapshot-name">{entry.name}</span>
+                    <span class="snapshot-date">
+                      {new Date(entry.timestamp).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+              </For>
+            </div>
+          </div>
         </Show>
       </div>
     </div>
