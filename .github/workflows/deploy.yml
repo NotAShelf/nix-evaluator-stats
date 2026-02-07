@@ -35,13 +35,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: GITHUB_PAGES=true pnpm run build
+      - name: Build core packages
+        run: pnpm -r --filter '!@ns/web' build
+
+      - name: Build web app
+        run: GITHUB_PAGES=true pnpm run build:web
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: dist
+          path: packages/web/dist
 
   deploy:
     needs: build
