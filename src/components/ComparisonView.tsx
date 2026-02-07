@@ -206,7 +206,7 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
                           <Show when={!row.isReduction}>
                             <ArrowUp size={14} />
                           </Show>
-                          {Math.abs(row.change).toFixed(1)}%
+                          {Math.abs(row.change).toFixed(2)}%
                         </span>
                       </Show>
                     }
