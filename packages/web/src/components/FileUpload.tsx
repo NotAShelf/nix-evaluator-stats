@@ -1,5 +1,5 @@
 import { createSignal, Show, For } from 'solid-js';
-import { StatsData, ComparisonEntry } from '../utils/types';
+import { StatsData, ComparisonEntry } from '@ns/core';
 import { BarChart2, Clock } from 'lucide-solid';
 
 interface FileUploadProps {

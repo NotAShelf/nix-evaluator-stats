@@ -1,6 +1,6 @@
 import { Component, createMemo, For, Show } from 'solid-js';
-import { StatsData } from '../utils/types';
-import { formatBytes, formatTime, formatPercent } from '../utils/formatters';
+import { StatsData } from '@ns/core';
+import { formatBytes, formatTime, formatPercent } from '@ns/ui-utils';
 
 interface TimeChartProps {
   stats: StatsData;

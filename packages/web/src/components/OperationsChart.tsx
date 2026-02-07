@@ -1,6 +1,6 @@
 import { Component, For, createMemo } from 'solid-js';
-import { StatsData } from '../utils/types';
-import { formatNumber } from '../utils/formatters';
+import { StatsData } from '@ns/core';
+import { formatNumber } from '@ns/ui-utils';
 
 interface OperationsChartProps {
   stats: StatsData;

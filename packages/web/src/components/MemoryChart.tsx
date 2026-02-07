@@ -1,5 +1,5 @@
 import { Component, For, createMemo } from 'solid-js';
-import { formatBytes } from '../utils/formatters';
+import { formatBytes } from '@ns/ui-utils';
 
 interface MemoryChartProps {
   data: Array<{

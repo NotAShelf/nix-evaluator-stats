@@ -2,8 +2,7 @@ import { createSignal, Show, For, onMount, createEffect, lazy } from 'solid-js';
 import { render } from 'solid-js/web';
 import { Github, Save, Upload, Trash2, X } from 'lucide-solid';
 import FileUpload from './components/FileUpload';
-import { StatsData, ComparisonEntry } from './utils/types';
-import { parseStats } from './utils/formatters';
+import { StatsData, ComparisonEntry, parseStats } from '@ns/core';
 import './styles.css';
 
 function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
