@@ -1,16 +1,17 @@
 {
-  "name": "ns",
+  "name": "@ns/web",
   "version": "1.0.0",
-  "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm -F @ns/web dev",
-    "check": "pnpm -r check",
-    "lint": "pnpm -r lint",
-    "fmt": "prettier --write .",
-    "build": "pnpm -r --filter '!@ns/web' build && pnpm -F @ns/web build",
-    "build:web": "pnpm -r --filter '!@ns/web' build && pnpm -F @ns/web build",
-    "preview": "pnpm -F @ns/web preview"
+    "dev": "vite",
+    "check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "build": "pnpm check && pnpm lint && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ns/core": "workspace:*",
+    "@ns/ui-utils": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",

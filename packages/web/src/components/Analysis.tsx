@@ -1,6 +1,6 @@
 import { Component, For, Show, createMemo } from 'solid-js';
-import { StatsData } from '../utils/types';
-import { formatBytes, formatNumber, formatTime } from '../utils/formatters';
+import { StatsData } from '@ns/core';
+import { formatBytes, formatNumber, formatTime } from '@ns/ui-utils';
 import MetricCard from './MetricCard';
 import Section from './Section';
 import MemoryChart from './MemoryChart';

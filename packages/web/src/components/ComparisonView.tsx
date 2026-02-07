@@ -1,12 +1,6 @@
 import { Component, For, createSignal, createMemo, Show } from 'solid-js';
-import { ComparisonEntry } from '../utils/types';
-import {
-  formatBytes,
-  formatNumber,
-  formatTime,
-  formatPercent,
-  calculateChange,
-} from '../utils/formatters';
+import { ComparisonEntry, calculateChange } from '@ns/core';
+import { formatBytes, formatNumber, formatTime, formatPercent } from '@ns/ui-utils';
 import { ArrowRight, ArrowDown, ArrowUp, X } from 'lucide-solid';
 
 interface ComparisonViewProps {
