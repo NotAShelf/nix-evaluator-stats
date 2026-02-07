@@ -30,6 +30,11 @@ regressions in subsequent exports.
 
 ## Usage
 
+NS provides both a web application for pretty visuals, and a terminal client (a
+TUI) for rendering the statistics from your terminal.
+
+### Web
+
 Usage instructions are provided in the initial page. Simply navigate to the site
 and provide the JSON export (or a file) to render the statistics. The number of
 rendered fields might differ based on your Nix version or implementation (Lix,
@@ -61,7 +66,7 @@ analysis you may compare two _named_ analyses at a time.
 > UI bugs or areas where UI polish is very clearly missing. Please crate an
 > issue if the generated graph or the site UI looks off. Thanks :)
 
-### Snapshots
+#### Snapshots
 
 Snapshots are an "experimental" (just means they're new and unpolished) feature
 that lets you save an analysis in your browser storage with a name to be used
@@ -72,9 +77,12 @@ You can save an analysis as a snapshot from the save button on the bottom right.
 
 ## Hacking
 
-This project is built with Vite, using Typescript-React (`.tsx`) and SolidJS. A
-Nix shell is provided, and dependencies can be fetched with `pnpm` while inside
-the dev shell.
+This project is built with various web technologies. Namely we use Vite,
+Typescript-React (`.tsx`) and SolidJS for most of our user interfaces.
+
+The recommended approach for resolving dependencies is using Nix; a Nix shell is
+provided, and dependencies can be fetched with `pnpm` while inside the dev
+shell.
 
 ```bash
 # Run the live server
