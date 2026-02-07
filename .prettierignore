@@ -1,7 +1,7 @@
-/node_modules/
-/dist/
 /.direnv
 .eslintcache
 *.md
 *.yml
 .DS_Store
+**/node_modules
+**/dist

@@ -1,4 +1,7 @@
+# Nix
 /.direnv/
-/node_modules/
-/dist/
-/result*/
+/result*
+
+# pnpm
+**/node_modules/
+**/dist/
