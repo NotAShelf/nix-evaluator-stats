@@ -25,6 +25,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Build core packages
+        run: pnpm -r --filter '!@ns/web' build
+
       - run: pnpm run check
       - run: pnpm run lint
       - run: pnpm run fmt --check
