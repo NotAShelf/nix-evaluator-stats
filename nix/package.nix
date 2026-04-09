@@ -20,7 +20,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   pnpmDeps = fetchPnpmDeps {
     inherit (finalAttrs) pname src;
-    hash = "sha256-5u2FmPYLRadLZeH6dRuoiXVejic7Z6JM4IzIdwLif/A=";
+    hash = "sha256-zhdgC+sjIUAUsStG3H8RfVSrbhQG62a3zXeIPTUoGbI=";
     fetcherVersion = 3; # https://nixos.org/manual/nixpkgs/stable/#javascript-pnpm-fetcherVersion
   };
 
