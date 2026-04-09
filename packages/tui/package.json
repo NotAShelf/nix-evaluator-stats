@@ -14,7 +14,7 @@
     "@ns/core": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^25.0.10",
-    "typescript": "^5.9.3"
+    "@types/node": "^25.5.2",
+    "typescript": "^6.0.2"
   }
 }
