@@ -6,16 +6,15 @@ import ClockIcon from 'lucide-solid/icons/clock';
 interface FileUploadProps {
   onFileLoad: (data: StatsData, raw: Record<string, unknown>) => void;
   onTextLoad: (text: string) => void;
-  showHelp: boolean;
-  onToggleHelp: () => void;
   snapshots?: ComparisonEntry[];
   onLoadSnapshot?: (entry: ComparisonEntry) => void;
 }
 
 export default function FileUpload(props: FileUploadProps) {
   const [textInput, setTextInput] = createSignal('');
-  const [isTextMode, setIsTextMode] = createSignal(false);
+  const [isTextMode, setIsTextMode] = createSignal(true);
   const [error, setError] = createSignal('');
+  const [showHelp, setShowHelp] = createSignal(false);
 
   const handleFile = async (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -49,11 +48,11 @@ export default function FileUpload(props: FileUploadProps) {
         </div>
         <h2>Load Statistics</h2>
 
-        <div class="help-link" onClick={props.onToggleHelp}>
+        <div class="help-link" onClick={() => setShowHelp(!showHelp())}>
           How do I use this?
         </div>
 
-        <Show when={props.showHelp}>
+        <Show when={showHelp()}>
           <div class="help-panel">
             <h4>Generating Stats</h4>
             <code>NIX_SHOW_STATS=1 nix-instantiate expr.nix &gt; stats.json</code>
@@ -85,6 +84,17 @@ export default function FileUpload(props: FileUploadProps) {
             class="json-input"
             value={textInput()}
             onInput={e => setTextInput(e.currentTarget.value)}
+            onPaste={e => {
+              const text = e.clipboardData?.getData('text');
+              if (!text) return;
+              e.preventDefault();
+              try {
+                JSON.parse(text);
+                props.onTextLoad(text);
+              } catch {
+                setError('Invalid JSON in clipboard');
+              }
+            }}
           />
           <button class="load-btn" onClick={handleTextLoad}>
             Load

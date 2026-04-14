@@ -29,11 +29,12 @@ function App() {
   const [view, setView] = createSignal<'analysis' | 'compare'>('analysis');
   const [snapshotName, setSnapshotName] = createSignal('');
   const [showSaveDialog, setShowSaveDialog] = createSignal(false);
-  const [showHelp, setShowHelp] = createSignal(false);
   const [showManageSnapshots, setShowManageSnapshots] = createSignal(false);
   const [precision, setPrecision] = createSignal(2);
   const [pasteMode, setPasteMode] = createSignal<'advance' | 'replace'>('advance');
   const [isLoading, setIsLoading] = createSignal(true);
+  const [showOverrideModal, setShowOverrideModal] = createSignal(false);
+  const [pendingOverrideText, setPendingOverrideText] = createSignal('');
 
   const STORAGE_KEY = 'ns-data';
 
@@ -80,8 +81,28 @@ function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
 
+    const handleAnalysisPaste = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+      const text = e.clipboardData?.getData('text');
+      if (!text) return;
+      try {
+        JSON.parse(text);
+      } catch {
+        return;
+      }
+      if (view() === 'analysis' && currentStats()) {
+        setPendingOverrideText(text);
+        setShowOverrideModal(true);
+      }
+    };
+    document.addEventListener('paste', handleAnalysisPaste);
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('paste', handleAnalysisPaste);
     };
   });
 
@@ -199,6 +220,34 @@ function App() {
     return entry;
   };
 
+  const handleCompareFileLoad = (data: StatsData, raw: Record<string, unknown>) => {
+    const entry: ComparisonEntry = {
+      id: Date.now(),
+      name: `Snapshot ${snapshots().length + 1}`,
+      data,
+      raw,
+      timestamp: new Date(),
+    };
+    setSnapshots(prev => [...prev, entry]);
+  };
+
+  const handleCompareTextLoad = (text: string) => {
+    try {
+      const raw = JSON.parse(text);
+      const data = parseStats(raw);
+      const entry: ComparisonEntry = {
+        id: Date.now(),
+        name: `Snapshot ${snapshots().length + 1}`,
+        data,
+        raw,
+        timestamp: new Date(),
+      };
+      setSnapshots(prev => [...prev, entry]);
+    } catch (e) {
+      console.error('Failed to parse stats:', e);
+    }
+  };
+
   return (
     <div class="app">
       <header class="header">
@@ -209,11 +258,7 @@ function App() {
           <button class={view() === 'analysis' ? 'active' : ''} onClick={() => setView('analysis')}>
             Analysis
           </button>
-          <button
-            class={view() === 'compare' ? 'active' : ''}
-            onClick={() => setView('compare')}
-            disabled={snapshots().length < 2}
-          >
+          <button class={view() === 'compare' ? 'active' : ''} onClick={() => setView('compare')}>
             Compare ({snapshots().length})
           </button>
           <Show when={snapshots().length > 0}>
@@ -251,8 +296,6 @@ function App() {
               <FileUpload
                 onFileLoad={handleFileLoad}
                 onTextLoad={loadFromText}
-                showHelp={showHelp()}
-                onToggleHelp={() => setShowHelp(!showHelp())}
                 snapshots={snapshots()}
                 onLoadSnapshot={loadSnapshot}
               />
@@ -283,6 +326,30 @@ function App() {
                   </div>
                 </div>
               </Show>
+              <Show when={showOverrideModal()}>
+                <div class="modal-overlay" onClick={() => setShowOverrideModal(false)}>
+                  <div class="modal" onClick={e => e.stopPropagation()}>
+                    <h3>Override Analysis?</h3>
+                    <p style={{ color: 'var(--text-secondary)', 'margin-bottom': '1rem' }}>
+                      This will replace the current analysis with pasted data.
+                    </p>
+                    <div class="modal-actions">
+                      <button class="cancel-btn" onClick={() => setShowOverrideModal(false)}>
+                        Cancel
+                      </button>
+                      <button
+                        class="confirm-btn"
+                        onClick={() => {
+                          loadFromText(pendingOverrideText());
+                          setShowOverrideModal(false);
+                        }}
+                      >
+                        Override
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Show>
             </Show>
           </Show>
 
@@ -295,6 +362,8 @@ function App() {
               pasteMode={pasteMode()}
               onPasteModeChange={setPasteMode}
               onPasteStats={handlePasteStats}
+              onFileLoad={handleCompareFileLoad}
+              onTextLoad={handleCompareTextLoad}
             />
           </Show>
         </Show>

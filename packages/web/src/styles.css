@@ -183,6 +183,7 @@ body {
   align-items: center;
   gap: 2rem;
   padding-top: 4rem;
+  width: 100%;
 }
 
 .upload-card {
@@ -1502,6 +1503,25 @@ body {
   background: var(--card-bg);
   border: 1px dashed var(--border-color);
   border-radius: 0.75rem;
+}
+
+.compare-placeholder-hint {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.compare-upload-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.compare-more-needed {
+  text-align: center;
+  padding: 1rem;
 }
 
 .comparison-table {

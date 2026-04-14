@@ -1,10 +1,11 @@
 import { Component, For, createSignal, createMemo, Show, onMount, onCleanup } from 'solid-js';
-import { ComparisonEntry, calculateChange } from '@ns/core';
+import { ComparisonEntry, calculateChange, StatsData } from '@ns/core';
 import { formatBytes, formatNumber, formatTime, formatPercent } from '@ns/ui-utils';
 import ArrowRightIcon from 'lucide-solid/icons/arrow-right';
 import ArrowDownIcon from 'lucide-solid/icons/arrow-down';
 import ArrowUpIcon from 'lucide-solid/icons/arrow-up';
 import XIcon from 'lucide-solid/icons/x';
+import FileUpload from './FileUpload';
 
 interface ComparisonViewProps {
   entries: ComparisonEntry[];
@@ -14,6 +15,8 @@ interface ComparisonViewProps {
   pasteMode: 'advance' | 'replace';
   onPasteModeChange: (mode: 'advance' | 'replace') => void;
   onPasteStats: (text: string, name: string) => ComparisonEntry | null;
+  onFileLoad: (data: StatsData, raw: Record<string, unknown>) => void;
+  onTextLoad: (text: string) => void;
 }
 
 const ComparisonView: Component<ComparisonViewProps> = props => {
@@ -150,159 +153,189 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
 
   return (
     <div class="comparison-view">
-      <div class="comparison-controls">
-        <div class="compare-selector">
-          <label>Baseline</label>
-          <select onChange={selectLeft} value={leftEntry()?.id || ''}>
-            <option value="">Select snapshot...</option>
-            <For each={props.entries}>
-              {entry => <option value={entry.id}>{entry.name}</option>}
-            </For>
-          </select>
-        </div>
-        <div class="compare-arrow">
-          <ArrowRightIcon size={20} />
-        </div>
-        <div class="compare-selector">
-          <label>Current</label>
-          <select onChange={selectRight} value={rightEntry()?.id || ''}>
-            <option value="">Select snapshot...</option>
-            <For each={props.entries}>
-              {entry => <option value={entry.id}>{entry.name}</option>}
-            </For>
-          </select>
-        </div>
-        <div class="compare-paste-toggle">
-          <button
-            class={props.pasteMode === 'advance' ? 'active' : ''}
-            onClick={() => props.onPasteModeChange('advance')}
-            title="Paste shifts current to baseline"
-          >
-            Auto
-          </button>
-          <button
-            class={props.pasteMode === 'replace' ? 'active' : ''}
-            onClick={() => props.onPasteModeChange('replace')}
-            title="Paste replaces current only"
-          >
-            Replace
-          </button>
-        </div>
-      </div>
-
-      <Show when={props.entries.length > 0}>
-        <div class="snapshots-list">
-          <h4>Saved Snapshots</h4>
-          <For each={props.entries}>
-            {entry => (
-              <div class="snapshot-item">
-                <span class="snapshot-name">{entry.name}</span>
-                <button class="delete-btn" onClick={() => props.onDelete(entry.id)}>
-                  <XIcon size={16} />
-                </button>
-              </div>
-            )}
-          </For>
+      <Show when={props.entries.length >= 2}>
+        <div class="comparison-controls">
+          <div class="compare-selector">
+            <label>Baseline</label>
+            <select onChange={selectLeft} value={leftEntry()?.id || ''}>
+              <option value="">Select snapshot...</option>
+              <For each={props.entries}>
+                {entry => <option value={entry.id}>{entry.name}</option>}
+              </For>
+            </select>
+          </div>
+          <div class="compare-arrow">
+            <ArrowRightIcon size={20} />
+          </div>
+          <div class="compare-selector">
+            <label>Current</label>
+            <select onChange={selectRight} value={rightEntry()?.id || ''}>
+              <option value="">Select snapshot...</option>
+              <For each={props.entries}>
+                {entry => <option value={entry.id}>{entry.name}</option>}
+              </For>
+            </select>
+          </div>
+          <div class="compare-paste-toggle">
+            <button
+              class={props.pasteMode === 'advance' ? 'active' : ''}
+              onClick={() => props.onPasteModeChange('advance')}
+              title="Paste shifts current to baseline"
+            >
+              Auto
+            </button>
+            <button
+              class={props.pasteMode === 'replace' ? 'active' : ''}
+              onClick={() => props.onPasteModeChange('replace')}
+              title="Paste replaces current only"
+            >
+              Replace
+            </button>
+          </div>
         </div>
       </Show>
 
       <Show
-        when={leftEntry() && rightEntry()}
-        fallback={<div class="compare-placeholder">Select two snapshots to compare metrics</div>}
-      >
-        <div class="comparison-table">
-          <div class="compare-header">
-            <div class="col-label">Metric</div>
-            <div class="col-value">{leftEntry()?.name}</div>
-            <div class="col-value">{rightEntry()?.name}</div>
-            <div class="col-change">Change</div>
-          </div>
-          <For each={comparison()}>
-            {row => (
-              <div
-                class={`compare-row ${row.isDifferent ? 'diff' : ''} ${row.isMissing ? 'missing' : ''}`}
-              >
-                <div class="col-label" title={row.label}>
-                  {row.label}
-                </div>
-                <div class="col-value">
-                  <Show
-                    when={row.isMissing}
-                    fallback={
-                      row.format === 'bytes'
-                        ? formatBytes(row.leftValue, prec())
-                        : row.format === 'time'
-                          ? formatTime(row.leftValue, prec())
-                          : row.format === 'percent'
-                            ? formatPercent(row.leftValue, prec())
-                            : formatNumber(row.leftValue, prec())
-                    }
-                  >
-                    <span class="missing-value">N/A</span>
-                  </Show>
-                </div>
-                <div class="col-value">
-                  <Show
-                    when={row.isMissing}
-                    fallback={
-                      row.format === 'bytes'
-                        ? formatBytes(row.rightValue, prec())
-                        : row.format === 'time'
-                          ? formatTime(row.rightValue, prec())
-                          : row.format === 'percent'
-                            ? formatPercent(row.rightValue, prec())
-                            : formatNumber(row.rightValue, prec())
-                    }
-                  >
-                    <span class="missing-value">N/A</span>
-                  </Show>
-                </div>
-                <div
-                  class={`col-change ${row.isReduction ? 'good' : row.isDifferent && !row.isMissing ? 'bad' : ''}`}
-                >
-                  <Show
-                    when={row.isMissing}
-                    fallback={
-                      <Show when={row.isDifferent} fallback={<span class="neutral">—</span>}>
-                        <span class="change-value">
-                          <Show when={row.isReduction}>
-                            <ArrowDownIcon size={14} />
-                          </Show>
-                          <Show when={!row.isReduction}>
-                            <ArrowUpIcon size={14} />
-                          </Show>
-                          {Math.abs(row.change).toFixed(prec())}%
-                        </span>
-                      </Show>
-                    }
-                  >
-                    <span
-                      class="missing-indicator"
-                      title="Field not available in one or both implementations"
-                    >
-                      N/A
-                    </span>
-                  </Show>
+        when={props.entries.length >= 2}
+        fallback={
+          <div class="compare-upload-section">
+            <FileUpload
+              onFileLoad={props.onFileLoad}
+              onTextLoad={props.onTextLoad}
+              snapshots={props.entries}
+              onLoadSnapshot={props.onSelect}
+            />
+            <Show when={props.entries.length === 1}>
+              <div class="compare-more-needed">
+                <div class="compare-placeholder-hint">
+                  Upload or paste one more snapshot to start comparing
                 </div>
               </div>
-            )}
-          </For>
-        </div>
+            </Show>
+          </div>
+        }
+      >
+        <Show when={props.entries.length > 0}>
+          <div class="snapshots-list">
+            <h4>Saved Snapshots</h4>
+            <For each={props.entries}>
+              {entry => (
+                <div class="snapshot-item">
+                  <span class="snapshot-name">{entry.name}</span>
+                  <button class="delete-btn" onClick={() => props.onDelete(entry.id)}>
+                    <XIcon size={16} />
+                  </button>
+                </div>
+              )}
+            </For>
+          </div>
+        </Show>
 
-        <div class="comparison-summary">
-          <Show when={comparison()?.some(r => r.isReduction)}>
-            <div class="summary-good">
-              <ArrowDownIcon size={16} />{' '}
-              {comparison()?.filter(r => r.isReduction && r.isDifferent).length} improved
+        <Show
+          when={leftEntry() && rightEntry()}
+          fallback={
+            <div class="compare-placeholder">
+              <div>Select two snapshots to compare metrics</div>
+              <div class="compare-placeholder-hint">
+                Paste JSON stats here (Ctrl+V) while in compare mode
+              </div>
             </div>
-          </Show>
-          <Show when={comparison()?.some(r => !r.isReduction && r.isDifferent)}>
-            <div class="summary-bad">
-              <ArrowUpIcon size={16} />{' '}
-              {comparison()?.filter(r => !r.isReduction && r.isDifferent).length} regressed
+          }
+        >
+          <div class="comparison-table">
+            <div class="compare-header">
+              <div class="col-label">Metric</div>
+              <div class="col-value">{leftEntry()?.name}</div>
+              <div class="col-value">{rightEntry()?.name}</div>
+              <div class="col-change">Change</div>
             </div>
-          </Show>
-        </div>
+            <For each={comparison()}>
+              {row => (
+                <div
+                  class={`compare-row ${row.isDifferent ? 'diff' : ''} ${row.isMissing ? 'missing' : ''}`}
+                >
+                  <div class="col-label" title={row.label}>
+                    {row.label}
+                  </div>
+                  <div class="col-value">
+                    <Show
+                      when={row.isMissing}
+                      fallback={
+                        row.format === 'bytes'
+                          ? formatBytes(row.leftValue, prec())
+                          : row.format === 'time'
+                            ? formatTime(row.leftValue, prec())
+                            : row.format === 'percent'
+                              ? formatPercent(row.leftValue, prec())
+                              : formatNumber(row.leftValue, prec())
+                      }
+                    >
+                      <span class="missing-value">N/A</span>
+                    </Show>
+                  </div>
+                  <div class="col-value">
+                    <Show
+                      when={row.isMissing}
+                      fallback={
+                        row.format === 'bytes'
+                          ? formatBytes(row.rightValue, prec())
+                          : row.format === 'time'
+                            ? formatTime(row.rightValue, prec())
+                            : row.format === 'percent'
+                              ? formatPercent(row.rightValue, prec())
+                              : formatNumber(row.rightValue, prec())
+                      }
+                    >
+                      <span class="missing-value">N/A</span>
+                    </Show>
+                  </div>
+                  <div
+                    class={`col-change ${row.isReduction ? 'good' : row.isDifferent && !row.isMissing ? 'bad' : ''}`}
+                  >
+                    <Show
+                      when={row.isMissing}
+                      fallback={
+                        <Show when={row.isDifferent} fallback={<span class="neutral">—</span>}>
+                          <span class="change-value">
+                            <Show when={row.isReduction}>
+                              <ArrowDownIcon size={14} />
+                            </Show>
+                            <Show when={!row.isReduction}>
+                              <ArrowUpIcon size={14} />
+                            </Show>
+                            {Math.abs(row.change).toFixed(prec())}%
+                          </span>
+                        </Show>
+                      }
+                    >
+                      <span
+                        class="missing-indicator"
+                        title="Field not available in one or both implementations"
+                      >
+                        N/A
+                      </span>
+                    </Show>
+                  </div>
+                </div>
+              )}
+            </For>
+          </div>
+
+          <div class="comparison-summary">
+            <Show when={comparison()?.some(r => r.isReduction)}>
+              <div class="summary-good">
+                <ArrowDownIcon size={16} />{' '}
+                {comparison()?.filter(r => r.isReduction && r.isDifferent).length} improved
+              </div>
+            </Show>
+            <Show when={comparison()?.some(r => !r.isReduction && r.isDifferent)}>
+              <div class="summary-bad">
+                <ArrowUpIcon size={16} />{' '}
+                {comparison()?.filter(r => !r.isReduction && r.isDifferent).length} regressed
+              </div>
+            </Show>
+          </div>
+        </Show>
       </Show>
 
       <Show when={showPasteModal()}>
@@ -349,7 +382,7 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
                 Cancel
               </button>
               <button class="confirm-btn" onClick={confirmPaste}>
-                Save &amp; Compare
+                {props.entries.length >= 2 ? 'Save & Compare' : 'Save Snapshot'}
               </button>
             </div>
           </div>
