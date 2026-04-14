@@ -1,4 +1,4 @@
-import { Component, For, createSignal, createMemo, Show } from 'solid-js';
+import { Component, For, createSignal, createMemo, Show, onMount, onCleanup } from 'solid-js';
 import { ComparisonEntry, calculateChange } from '@ns/core';
 import { formatBytes, formatNumber, formatTime, formatPercent } from '@ns/ui-utils';
 import ArrowRightIcon from 'lucide-solid/icons/arrow-right';
@@ -11,12 +11,62 @@ interface ComparisonViewProps {
   onSelect: (entry: ComparisonEntry) => void;
   onDelete: (id: number) => void;
   precision?: number;
+  pasteMode: 'advance' | 'replace';
+  onPasteModeChange: (mode: 'advance' | 'replace') => void;
+  onPasteStats: (text: string, name: string) => ComparisonEntry | null;
 }
 
 const ComparisonView: Component<ComparisonViewProps> = props => {
   const prec = () => props.precision ?? 2;
   const [leftEntry, setLeftEntry] = createSignal<ComparisonEntry | null>(null);
   const [rightEntry, setRightEntry] = createSignal<ComparisonEntry | null>(null);
+  const [showPasteModal, setShowPasteModal] = createSignal(false);
+  const [pasteError, setPasteError] = createSignal('');
+  const [pasteName, setPasteName] = createSignal('');
+  const [pendingPasteText, setPendingPasteText] = createSignal('');
+
+  const handlePaste = (e: ClipboardEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      return;
+    }
+    const text = e.clipboardData?.getData('text');
+    if (!text) return;
+    try {
+      JSON.parse(text);
+      setPendingPasteText(text);
+      setPasteName(`Snapshot ${props.entries.length + 1}`);
+      setShowPasteModal(true);
+    } catch {
+      // Silently ignore invalid JSON on paste
+    }
+  };
+
+  onMount(() => {
+    document.addEventListener('paste', handlePaste);
+  });
+
+  onCleanup(() => {
+    document.removeEventListener('paste', handlePaste);
+  });
+
+  const confirmPaste = () => {
+    const entry = props.onPasteStats(pendingPasteText(), pasteName());
+    if (!entry) {
+      setPasteError('Failed to process pasted statistics');
+      return;
+    }
+    if (props.pasteMode === 'advance') {
+      if (rightEntry()) {
+        setLeftEntry(rightEntry());
+      }
+      setRightEntry(entry);
+    } else {
+      setRightEntry(entry);
+    }
+    setShowPasteModal(false);
+    setPasteError('');
+  };
 
   const comparison = createMemo(() => {
     const left = leftEntry();
@@ -122,6 +172,22 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
             </For>
           </select>
         </div>
+        <div class="compare-paste-toggle">
+          <button
+            class={props.pasteMode === 'advance' ? 'active' : ''}
+            onClick={() => props.onPasteModeChange('advance')}
+            title="Paste shifts current to baseline"
+          >
+            Auto
+          </button>
+          <button
+            class={props.pasteMode === 'replace' ? 'active' : ''}
+            onClick={() => props.onPasteModeChange('replace')}
+            title="Paste replaces current only"
+          >
+            Replace
+          </button>
+        </div>
       </div>
 
       <Show when={props.entries.length > 0}>
@@ -164,12 +230,12 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
                     when={row.isMissing}
                     fallback={
                       row.format === 'bytes'
-                        ? formatBytes(row.leftValue)
+                        ? formatBytes(row.leftValue, prec())
                         : row.format === 'time'
-                          ? formatTime(row.leftValue)
+                          ? formatTime(row.leftValue, prec())
                           : row.format === 'percent'
-                            ? formatPercent(row.leftValue)
-                            : formatNumber(row.leftValue)
+                            ? formatPercent(row.leftValue, prec())
+                            : formatNumber(row.leftValue, prec())
                     }
                   >
                     <span class="missing-value">N/A</span>
@@ -180,12 +246,12 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
                     when={row.isMissing}
                     fallback={
                       row.format === 'bytes'
-                        ? formatBytes(row.rightValue)
+                        ? formatBytes(row.rightValue, prec())
                         : row.format === 'time'
-                          ? formatTime(row.rightValue)
+                          ? formatTime(row.rightValue, prec())
                           : row.format === 'percent'
-                            ? formatPercent(row.rightValue)
-                            : formatNumber(row.rightValue)
+                            ? formatPercent(row.rightValue, prec())
+                            : formatNumber(row.rightValue, prec())
                     }
                   >
                     <span class="missing-value">N/A</span>
@@ -236,6 +302,57 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
               {comparison()?.filter(r => !r.isReduction && r.isDifferent).length} regressed
             </div>
           </Show>
+        </div>
+      </Show>
+
+      <Show when={showPasteModal()}>
+        <div
+          class="modal-overlay"
+          onClick={() => {
+            setShowPasteModal(false);
+            setPasteError('');
+          }}
+        >
+          <div class="modal" onClick={e => e.stopPropagation()}>
+            <div class="modal-header">
+              <h3>Paste Statistics</h3>
+              <button
+                class="close-btn"
+                onClick={() => {
+                  setShowPasteModal(false);
+                  setPasteError('');
+                }}
+              >
+                <XIcon size={20} />
+              </button>
+            </div>
+            <input
+              type="text"
+              class="snapshot-name-input"
+              placeholder="Enter snapshot name..."
+              value={pasteName()}
+              onInput={e => setPasteName(e.currentTarget.value)}
+              onKeyDown={e => e.key === 'Enter' && confirmPaste()}
+              autofocus
+            />
+            <Show when={pasteError()}>
+              <div class="error">{pasteError()}</div>
+            </Show>
+            <div class="modal-actions">
+              <button
+                class="cancel-btn"
+                onClick={() => {
+                  setShowPasteModal(false);
+                  setPasteError('');
+                }}
+              >
+                Cancel
+              </button>
+              <button class="confirm-btn" onClick={confirmPaste}>
+                Save &amp; Compare
+              </button>
+            </div>
+          </div>
         </div>
       </Show>
     </div>

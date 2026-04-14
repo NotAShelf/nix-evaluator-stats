@@ -32,6 +32,7 @@ function App() {
   const [showHelp, setShowHelp] = createSignal(false);
   const [showManageSnapshots, setShowManageSnapshots] = createSignal(false);
   const [precision, setPrecision] = createSignal(2);
+  const [pasteMode, setPasteMode] = createSignal<'advance' | 'replace'>('advance');
   const [isLoading, setIsLoading] = createSignal(true);
 
   const STORAGE_KEY = 'ns-data';
@@ -62,6 +63,9 @@ function App() {
         if (typeof parsed.precision === 'number' && parsed.precision >= 0) {
           setPrecision(parsed.precision);
         }
+        if (parsed.pasteMode === 'advance' || parsed.pasteMode === 'replace') {
+          setPasteMode(parsed.pasteMode);
+        }
       }
     } catch (e) {
       console.warn('Failed to load saved data:', e);
@@ -89,6 +93,7 @@ function App() {
       snaps: ComparisonEntry[],
       v: 'analysis' | 'compare',
       prec: number,
+      pm: 'advance' | 'replace',
     ) => {
       try {
         localStorage.setItem(
@@ -99,6 +104,7 @@ function App() {
             currentRaw: raw,
             view: v,
             precision: prec,
+            pasteMode: pm,
           }),
         );
       } catch (e) {
@@ -115,10 +121,11 @@ function App() {
     const snaps = snapshots();
     const v = view();
     const prec = precision();
+    const pm = pasteMode();
 
     if (isLoading()) return;
 
-    saveToStorage(stats, raw, snaps, v, prec);
+    saveToStorage(stats, raw, snaps, v, prec, pm);
   });
 
   const saveSnapshot = () => {
@@ -169,6 +176,27 @@ function App() {
     } catch (e) {
       console.error('Failed to parse stats:', e);
     }
+  };
+
+  const handlePasteStats = (text: string, name: string): ComparisonEntry | null => {
+    let raw: Record<string, unknown>;
+    let data: StatsData;
+    try {
+      raw = JSON.parse(text);
+      data = parseStats(raw);
+    } catch (e) {
+      console.error('Failed to parse pasted stats:', e);
+      return null;
+    }
+    const entry: ComparisonEntry = {
+      id: Date.now(),
+      name: name.trim() || `Snapshot ${snapshots().length + 1}`,
+      data,
+      raw,
+      timestamp: new Date(),
+    };
+    setSnapshots(prev => [...prev, entry]);
+    return entry;
   };
 
   return (
@@ -264,6 +292,9 @@ function App() {
               onSelect={entry => setCurrentStats(entry.data)}
               onDelete={deleteSnapshot}
               precision={precision()}
+              pasteMode={pasteMode()}
+              onPasteModeChange={setPasteMode}
+              onPasteStats={handlePasteStats}
             />
           </Show>
         </Show>
