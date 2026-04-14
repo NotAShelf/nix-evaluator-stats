@@ -1,5 +1,5 @@
 import { Component, createSignal, type JSX, Show } from 'solid-js';
-import { ChevronDown } from 'lucide-solid';
+import ChevronDownIcon from 'lucide-solid/icons/chevron-down';
 
 interface SectionProps {
   title: string;
@@ -16,7 +16,7 @@ const Section: Component<SectionProps> = props => {
       <Show when={props.collapsible}>
         <button class="section-header" onClick={() => setCollapsed(!collapsed())}>
           <span class="section-title">{props.title}</span>
-          <ChevronDown size={16} class="section-toggle" />
+          <ChevronDownIcon size={16} class="section-toggle" />
         </button>
       </Show>
       <Show when={!props.collapsible || !collapsed()}>

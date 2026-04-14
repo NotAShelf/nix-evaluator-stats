@@ -1,7 +1,10 @@
 import { Component, For, createSignal, createMemo, Show } from 'solid-js';
 import { ComparisonEntry, calculateChange } from '@ns/core';
 import { formatBytes, formatNumber, formatTime, formatPercent } from '@ns/ui-utils';
-import { ArrowRight, ArrowDown, ArrowUp, X } from 'lucide-solid';
+import ArrowRightIcon from 'lucide-solid/icons/arrow-right';
+import ArrowDownIcon from 'lucide-solid/icons/arrow-down';
+import ArrowUpIcon from 'lucide-solid/icons/arrow-up';
+import XIcon from 'lucide-solid/icons/x';
 
 interface ComparisonViewProps {
   entries: ComparisonEntry[];
@@ -106,7 +109,7 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
           </select>
         </div>
         <div class="compare-arrow">
-          <ArrowRight size={20} />
+          <ArrowRightIcon size={20} />
         </div>
         <div class="compare-selector">
           <label>Current</label>
@@ -127,7 +130,7 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
               <div class="snapshot-item">
                 <span class="snapshot-name">{entry.name}</span>
                 <button class="delete-btn" onClick={() => props.onDelete(entry.id)}>
-                  <X size={16} />
+                  <XIcon size={16} />
                 </button>
               </div>
             )}
@@ -195,10 +198,10 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
                       <Show when={row.isDifferent} fallback={<span class="neutral">—</span>}>
                         <span class="change-value">
                           <Show when={row.isReduction}>
-                            <ArrowDown size={14} />
+                            <ArrowDownIcon size={14} />
                           </Show>
                           <Show when={!row.isReduction}>
-                            <ArrowUp size={14} />
+                            <ArrowUpIcon size={14} />
                           </Show>
                           {Math.abs(row.change).toFixed(2)}%
                         </span>
@@ -221,13 +224,13 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
         <div class="comparison-summary">
           <Show when={comparison()?.some(r => r.isReduction)}>
             <div class="summary-good">
-              <ArrowDown size={16} />{' '}
+              <ArrowDownIcon size={16} />{' '}
               {comparison()?.filter(r => r.isReduction && r.isDifferent).length} improved
             </div>
           </Show>
           <Show when={comparison()?.some(r => !r.isReduction && r.isDifferent)}>
             <div class="summary-bad">
-              <ArrowUp size={16} />{' '}
+              <ArrowUpIcon size={16} />{' '}
               {comparison()?.filter(r => !r.isReduction && r.isDifferent).length} regressed
             </div>
           </Show>

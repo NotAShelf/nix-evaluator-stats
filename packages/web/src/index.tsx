@@ -1,6 +1,9 @@
 import { createSignal, Show, For, onMount, createEffect, lazy } from 'solid-js';
 import { render } from 'solid-js/web';
-import { Github, Save, Upload, Trash2, X } from 'lucide-solid';
+import SaveIcon from 'lucide-solid/icons/save';
+import UploadIcon from 'lucide-solid/icons/upload';
+import Trash2Icon from 'lucide-solid/icons/trash-2';
+import XIcon from 'lucide-solid/icons/x';
 import FileUpload from './components/FileUpload';
 import { StatsData, ComparisonEntry, parseStats } from '@ns/core';
 import './styles.css';
@@ -184,7 +187,7 @@ function App() {
               onClick={() => setShowManageSnapshots(true)}
               title="Manage Snapshots"
             >
-              <Trash2 size={16} />
+              <Trash2Icon size={16} />
             </button>
           </Show>
         </nav>
@@ -255,7 +258,7 @@ function App() {
           rel="noopener noreferrer"
           class="footer-link"
         >
-          <Github size={16} />
+          <img src="/assets/github.svg" alt="GitHub" width={16} height={16} />
           Source
         </a>
       </footer>
@@ -266,7 +269,7 @@ function App() {
             <div class="modal-header">
               <h3>Manage Snapshots</h3>
               <button class="close-btn" onClick={() => setShowManageSnapshots(false)}>
-                <X size={20} />
+                <XIcon size={20} />
               </button>
             </div>
             <div class="snapshot-list-manage">
@@ -281,7 +284,7 @@ function App() {
                       </span>
                     </div>
                     <button class="delete-btn" onClick={() => deleteSnapshot(entry.id)}>
-                      <X size={16} />
+                      <XIcon size={16} />
                     </button>
                   </div>
                 )}
@@ -290,7 +293,7 @@ function App() {
             <Show when={snapshots().length > 0}>
               <div class="modal-actions">
                 <button class="danger-btn" onClick={clearAllSnapshots}>
-                  <Trash2 size={16} />
+                  <Trash2Icon size={16} />
                   Clear All
                 </button>
               </div>
@@ -306,10 +309,10 @@ function App() {
             onClick={() => setShowSaveDialog(true)}
             title="Save Snapshot"
           >
-            <Save size={20} />
+            <SaveIcon size={20} />
           </button>
           <button class="action-btn clear" onClick={() => setCurrentStats(null)} title="Load New">
-            <Upload size={20} />
+            <UploadIcon size={20} />
           </button>
         </div>
       </Show>

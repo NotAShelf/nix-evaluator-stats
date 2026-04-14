@@ -168,6 +168,10 @@ body {
   transition: color 0.2s;
 }
 
+.footer-link img {
+  fill: currentColor;
+}
+
 .footer-link:hover {
   color: var(--text-primary);
 }

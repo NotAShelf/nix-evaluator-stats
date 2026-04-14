@@ -1,6 +1,7 @@
 import { createSignal, Show, For } from 'solid-js';
 import { StatsData, ComparisonEntry } from '@ns/core';
-import { BarChart2, Clock } from 'lucide-solid';
+import BarChart2Icon from 'lucide-solid/icons/bar-chart-2';
+import ClockIcon from 'lucide-solid/icons/clock';
 
 interface FileUploadProps {
   onFileLoad: (data: StatsData, raw: Record<string, unknown>) => void;
@@ -44,7 +45,7 @@ export default function FileUpload(props: FileUploadProps) {
     <div class="upload-container">
       <div class="upload-card">
         <div class="upload-icon">
-          <BarChart2 size={48} />
+          <BarChart2Icon size={48} />
         </div>
         <h2>Load Statistics</h2>
 
@@ -97,7 +98,7 @@ export default function FileUpload(props: FileUploadProps) {
         <Show when={props.snapshots && props.snapshots.length > 0}>
           <div class="recent-analyses">
             <h3>
-              <Clock size={16} />
+              <ClockIcon size={16} />
               Recent Analyses
             </h3>
             <div class="snapshot-list">
