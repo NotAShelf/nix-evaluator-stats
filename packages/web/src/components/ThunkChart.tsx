@@ -49,7 +49,10 @@ const ThunkChart: Component<ThunkChartProps> = props => {
         <div class="ratio-bar">
           <div class="ratio-fill" style={{ width: `${avoidedRatio() * 100}%` }} />
         </div>
-        <span class="ratio-label">Avoidance rate: {(avoidedRatio() * 100).toFixed(prec())}%</span>
+        <span class="ratio-label">
+          Avoidance rate:{' '}
+          {Math.round(avoidedRatio() * 100 * Math.pow(10, prec())) / Math.pow(10, prec())}%
+        </span>
       </div>
     </div>
   );

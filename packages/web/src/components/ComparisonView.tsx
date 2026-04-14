@@ -303,7 +303,13 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
                             <Show when={!row.isReduction}>
                               <ArrowUpIcon size={14} />
                             </Show>
-                            {Math.abs(row.change).toFixed(prec())}%
+                            {parseFloat(
+                              (
+                                Math.round(Math.abs(row.change) * Math.pow(10, prec())) /
+                                Math.pow(10, prec())
+                              ).toFixed(prec()),
+                            )}
+                            %
                           </span>
                         </Show>
                       }

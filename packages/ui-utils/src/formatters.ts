@@ -6,10 +6,11 @@ export function formatBytes(bytes: number, precision = 2): string {
 }
 
 export function formatNumber(num: number, precision = 2): string {
-  if (num >= 1e9) return (num / 1e9).toFixed(precision) + 'B';
-  if (num >= 1e6) return (num / 1e6).toFixed(precision) + 'M';
-  if (num >= 1e3) return (num / 1e3).toFixed(precision) + 'K';
-  return num.toString();
+  if (num >= 1e9) return parseFloat((num / 1e9).toFixed(precision)).toString() + 'B';
+  if (num >= 1e6) return parseFloat((num / 1e6).toFixed(precision)).toString() + 'M';
+  if (num >= 1e3) return parseFloat((num / 1e3).toFixed(precision)).toString() + 'K';
+  const factor = Math.pow(10, precision);
+  return (Math.round(num * factor) / factor).toString();
 }
 
 export function formatTime(seconds: number, precision = 2): string {
