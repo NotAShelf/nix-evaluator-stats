@@ -10,9 +10,11 @@ interface ComparisonViewProps {
   entries: ComparisonEntry[];
   onSelect: (entry: ComparisonEntry) => void;
   onDelete: (id: number) => void;
+  precision?: number;
 }
 
 const ComparisonView: Component<ComparisonViewProps> = props => {
+  const prec = () => props.precision ?? 2;
   const [leftEntry, setLeftEntry] = createSignal<ComparisonEntry | null>(null);
   const [rightEntry, setRightEntry] = createSignal<ComparisonEntry | null>(null);
 
@@ -203,7 +205,7 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
                           <Show when={!row.isReduction}>
                             <ArrowUpIcon size={14} />
                           </Show>
-                          {Math.abs(row.change).toFixed(2)}%
+                          {Math.abs(row.change).toFixed(prec())}%
                         </span>
                       </Show>
                     }

@@ -4,9 +4,11 @@ import { formatBytes, formatTime, formatPercent } from '@ns/ui-utils';
 
 interface TimeChartProps {
   stats: StatsData;
+  precision?: number;
 }
 
 const TimeChart: Component<TimeChartProps> = props => {
+  const prec = () => props.precision ?? 2;
   const timeData = createMemo(() => {
     const cpu = props.stats.time.cpu;
     const gc = props.stats.time.gc || 0;
@@ -45,7 +47,7 @@ const TimeChart: Component<TimeChartProps> = props => {
                   }}
                 />
               </div>
-              <div class="time-bar-value">{formatTime(item.value)}</div>
+              <div class="time-bar-value">{formatTime(item.value, prec())}</div>
             </div>
           )}
         </For>
@@ -59,11 +61,13 @@ const TimeChart: Component<TimeChartProps> = props => {
           </div>
           <div class="gc-stat">
             <span class="gc-stat-label">Heap Size</span>
-            <span class="gc-stat-value">{formatBytes(props.stats.gc?.heapSize || 0)}</span>
+            <span class="gc-stat-value">{formatBytes(props.stats.gc?.heapSize || 0, prec())}</span>
           </div>
           <div class="gc-stat">
             <span class="gc-stat-label">GC Fraction</span>
-            <span class="gc-stat-value">{formatPercent(props.stats.time.gcFraction || 0)}</span>
+            <span class="gc-stat-value">
+              {formatPercent(props.stats.time.gcFraction || 0, prec())}
+            </span>
           </div>
         </div>
       </Show>

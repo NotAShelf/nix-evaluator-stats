@@ -31,6 +31,7 @@ function App() {
   const [showSaveDialog, setShowSaveDialog] = createSignal(false);
   const [showHelp, setShowHelp] = createSignal(false);
   const [showManageSnapshots, setShowManageSnapshots] = createSignal(false);
+  const [precision, setPrecision] = createSignal(2);
   const [isLoading, setIsLoading] = createSignal(true);
 
   const STORAGE_KEY = 'ns-data';
@@ -58,6 +59,9 @@ function App() {
         if (parsed.view) {
           setView(parsed.view);
         }
+        if (typeof parsed.precision === 'number' && parsed.precision >= 0) {
+          setPrecision(parsed.precision);
+        }
       }
     } catch (e) {
       console.warn('Failed to load saved data:', e);
@@ -84,6 +88,7 @@ function App() {
       raw: Record<string, unknown> | null,
       snaps: ComparisonEntry[],
       v: 'analysis' | 'compare',
+      prec: number,
     ) => {
       try {
         localStorage.setItem(
@@ -93,6 +98,7 @@ function App() {
             currentStats: stats,
             currentRaw: raw,
             view: v,
+            precision: prec,
           }),
         );
       } catch (e) {
@@ -108,10 +114,11 @@ function App() {
     const raw = currentRaw();
     const snaps = snapshots();
     const v = view();
+    const prec = precision();
 
     if (isLoading()) return;
 
-    saveToStorage(stats, raw, snaps, v);
+    saveToStorage(stats, raw, snaps, v, prec);
   });
 
   const saveSnapshot = () => {
@@ -190,6 +197,16 @@ function App() {
               <Trash2Icon size={16} />
             </button>
           </Show>
+          <select
+            class="precision-select"
+            value={precision()}
+            onChange={e => setPrecision(parseInt(e.currentTarget.value, 10))}
+            title="Decimal Precision"
+          >
+            <For each={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}>
+              {p => <option value={p}>{p} dp</option>}
+            </For>
+          </select>
         </nav>
       </header>
 
@@ -213,7 +230,7 @@ function App() {
               />
             </Show>
             <Show when={currentStats()}>
-              <Analysis stats={currentStats()!} />
+              <Analysis stats={currentStats()!} precision={precision()} />
               <Show when={showSaveDialog()}>
                 <div class="modal-overlay" onClick={() => setShowSaveDialog(false)}>
                   <div class="modal" onClick={e => e.stopPropagation()}>
@@ -246,6 +263,7 @@ function App() {
               entries={snapshots()}
               onSelect={entry => setCurrentStats(entry.data)}
               onDelete={deleteSnapshot}
+              precision={precision()}
             />
           </Show>
         </Show>

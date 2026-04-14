@@ -46,7 +46,8 @@ const TOOLTIPS = {
   attrSelect: 'Number of attribute selections performed (accessing .attr from an attribute set)',
 };
 
-const Analysis: Component<{ stats: StatsData }> = props => {
+const Analysis: Component<{ stats: StatsData; precision?: number }> = props => {
+  const prec = () => props.precision ?? 2;
   const totalMemory = createMemo(
     () =>
       props.stats.envs.bytes +
@@ -105,18 +106,22 @@ const Analysis: Component<{ stats: StatsData }> = props => {
         <div class="header-stats">
           <MetricCard
             label="CPU Time"
-            value={formatTime(props.stats.cpuTime)}
+            value={formatTime(props.stats.cpuTime, prec())}
             tooltip={TOOLTIPS.cpuTime}
           />
-          <MetricCard label="Memory" value={formatBytes(totalMemory())} tooltip={TOOLTIPS.memory} />
+          <MetricCard
+            label="Memory"
+            value={formatBytes(totalMemory(), prec())}
+            tooltip={TOOLTIPS.memory}
+          />
           <MetricCard
             label="Expressions"
-            value={formatNumber(props.stats.nrExprs)}
+            value={formatNumber(props.stats.nrExprs, prec())}
             tooltip={TOOLTIPS.nrExprs}
           />
           <MetricCard
             label="Thunks"
-            value={`${formatNumber(props.stats.nrAvoided)} / ${formatNumber(props.stats.nrThunks)}`}
+            value={`${formatNumber(props.stats.nrAvoided, prec())} / ${formatNumber(props.stats.nrThunks, prec())}`}
             tooltip="Avoided / Created thunks. Avoided means the value was already computed and reused."
             highlight={props.stats.nrAvoided >= props.stats.nrThunks}
           />
@@ -131,11 +136,11 @@ const Analysis: Component<{ stats: StatsData }> = props => {
               <div class="gc-header">GC Statistics</div>
               <div class="gc-values">
                 <span class="gc-label">Heap:</span>
-                <span class="gc-value">{formatBytes(props.stats.gc?.heapSize || 0)}</span>
+                <span class="gc-value">{formatBytes(props.stats.gc?.heapSize || 0, prec())}</span>
                 <span class="gc-label">Allocated:</span>
-                <span class="gc-value">{formatBytes(props.stats.gc?.totalBytes || 0)}</span>
+                <span class="gc-value">{formatBytes(props.stats.gc?.totalBytes || 0, prec())}</span>
                 <span class="gc-label">Cycles:</span>
-                <span class="gc-value">{formatNumber(props.stats.gc?.cycles || 0)}</span>
+                <span class="gc-value">{formatNumber(props.stats.gc?.cycles || 0, prec())}</span>
               </div>
             </div>
           </Show>
@@ -143,15 +148,15 @@ const Analysis: Component<{ stats: StatsData }> = props => {
 
         <Section title="Time & Thunks" collapsible>
           <div class="time-thunks-combined">
-            <TimeChart stats={props.stats} />
+            <TimeChart stats={props.stats} precision={prec()} />
             <div class="thunks-section">
-              <ThunkChart stats={props.stats} />
+              <ThunkChart stats={props.stats} precision={prec()} />
             </div>
           </div>
         </Section>
 
         <Section title="Operations" collapsible>
-          <OperationsChart stats={props.stats} />
+          <OperationsChart stats={props.stats} precision={prec()} />
         </Section>
       </div>
 
@@ -160,17 +165,17 @@ const Analysis: Component<{ stats: StatsData }> = props => {
           <div class="metrics-grid small">
             <MetricCard
               label="Count"
-              value={formatNumber(props.stats.envs.number)}
+              value={formatNumber(props.stats.envs.number, prec())}
               tooltip={TOOLTIPS.envsNumber}
             />
             <MetricCard
               label="Elements"
-              value={formatNumber(props.stats.envs.elements)}
+              value={formatNumber(props.stats.envs.elements, prec())}
               tooltip={TOOLTIPS.envsElements}
             />
             <MetricCard
               label="Memory"
-              value={formatBytes(props.stats.envs.bytes)}
+              value={formatBytes(props.stats.envs.bytes, prec())}
               tooltip={TOOLTIPS.envsBytes}
             />
           </div>
@@ -180,22 +185,22 @@ const Analysis: Component<{ stats: StatsData }> = props => {
           <div class="metrics-grid small">
             <MetricCard
               label="Values"
-              value={formatNumber(props.stats.values.number)}
+              value={formatNumber(props.stats.values.number, prec())}
               tooltip={TOOLTIPS.valuesNumber}
             />
             <MetricCard
               label="Value Bytes"
-              value={formatBytes(props.stats.values.bytes)}
+              value={formatBytes(props.stats.values.bytes, prec())}
               tooltip={TOOLTIPS.valuesBytes}
             />
             <MetricCard
               label="Symbols"
-              value={formatNumber(props.stats.symbols.number)}
+              value={formatNumber(props.stats.symbols.number, prec())}
               tooltip={TOOLTIPS.symbolsNumber}
             />
             <MetricCard
               label="Symbol Bytes"
-              value={formatBytes(props.stats.symbols.bytes)}
+              value={formatBytes(props.stats.symbols.bytes, prec())}
               tooltip={TOOLTIPS.symbolsBytes}
             />
           </div>
@@ -205,22 +210,22 @@ const Analysis: Component<{ stats: StatsData }> = props => {
           <div class="metrics-grid small">
             <MetricCard
               label="List Elements"
-              value={formatNumber(props.stats.list.elements)}
+              value={formatNumber(props.stats.list.elements, prec())}
               tooltip={TOOLTIPS.listElements}
             />
             <MetricCard
               label="Concat Ops"
-              value={formatNumber(props.stats.list.concats)}
+              value={formatNumber(props.stats.list.concats, prec())}
               tooltip={TOOLTIPS.listConcats}
             />
             <MetricCard
               label="Set Count"
-              value={formatNumber(props.stats.sets.number)}
+              value={formatNumber(props.stats.sets.number, prec())}
               tooltip={TOOLTIPS.setsNumber}
             />
             <MetricCard
               label="Attributes"
-              value={formatNumber(props.stats.sets.elements)}
+              value={formatNumber(props.stats.sets.elements, prec())}
               tooltip={TOOLTIPS.setsElements}
             />
           </div>
@@ -235,7 +240,7 @@ const Analysis: Component<{ stats: StatsData }> = props => {
                 <div class="top-item">
                   <span class="rank">{i() + 1}</span>
                   <span class="name">{item.name}</span>
-                  <span class="count">{formatNumber(item.count)}</span>
+                  <span class="count">{formatNumber(item.count, prec())}</span>
                 </div>
               )}
             </For>
@@ -251,7 +256,7 @@ const Analysis: Component<{ stats: StatsData }> = props => {
                 <div class="top-item">
                   <span class="rank">{i() + 1}</span>
                   <span class="name">{item.name || '<lambda>'}</span>
-                  <span class="count">{formatNumber(item.count)}</span>
+                  <span class="count">{formatNumber(item.count, prec())}</span>
                   <span class="location">
                     {item.file}:{item.line}
                   </span>
@@ -267,22 +272,22 @@ const Analysis: Component<{ stats: StatsData }> = props => {
           <div class="metrics-grid small">
             <MetricCard
               label="NAR Reads"
-              value={formatNumber(props.stats.narRead || 0)}
+              value={formatNumber(props.stats.narRead || 0, prec())}
               tooltip={TOOLTIPS.narRead}
             />
             <MetricCard
               label="NAR Writes"
-              value={formatNumber(props.stats.narWrite || 0)}
+              value={formatNumber(props.stats.narWrite || 0, prec())}
               tooltip={TOOLTIPS.narWrite}
             />
             <MetricCard
               label="Read Bytes"
-              value={formatBytes(props.stats.narReadBytes || 0)}
+              value={formatBytes(props.stats.narReadBytes || 0, prec())}
               tooltip={TOOLTIPS.narReadBytes}
             />
             <MetricCard
               label="Write Bytes"
-              value={formatBytes(props.stats.narWriteBytes || 0)}
+              value={formatBytes(props.stats.narWriteBytes || 0, prec())}
               tooltip={TOOLTIPS.narWriteBytes}
             />
           </div>
@@ -299,7 +304,7 @@ const Analysis: Component<{ stats: StatsData }> = props => {
                   <span class="location">
                     {item.file}:{item.line}
                   </span>
-                  <span class="count">{formatNumber(item.count)}</span>
+                  <span class="count">{formatNumber(item.count, prec())}</span>
                 </div>
               )}
             </For>

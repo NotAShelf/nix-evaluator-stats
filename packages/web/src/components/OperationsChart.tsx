@@ -4,9 +4,11 @@ import { formatNumber } from '@ns/ui-utils';
 
 interface OperationsChartProps {
   stats: StatsData;
+  precision?: number;
 }
 
 const OperationsChart: Component<OperationsChartProps> = props => {
+  const prec = () => props.precision ?? 2;
   const operations = createMemo(() =>
     [
       { label: 'Lookups', value: props.stats.nrLookups, colorClass: 'chart-1' },
@@ -34,7 +36,7 @@ const OperationsChart: Component<OperationsChartProps> = props => {
                 }}
               />
             </div>
-            <div class="op-value">{formatNumber(item.value)}</div>
+            <div class="op-value">{formatNumber(item.value, prec())}</div>
           </div>
         )}
       </For>

@@ -4,9 +4,11 @@ import { formatNumber } from '@ns/ui-utils';
 
 interface ThunkChartProps {
   stats: StatsData;
+  precision?: number;
 }
 
 const ThunkChart: Component<ThunkChartProps> = props => {
+  const prec = () => props.precision ?? 2;
   const maxValue = createMemo(() => Math.max(props.stats.nrThunks, props.stats.nrAvoided));
 
   const avoidedRatio = createMemo(() => {
@@ -47,7 +49,7 @@ const ThunkChart: Component<ThunkChartProps> = props => {
         <div class="ratio-bar">
           <div class="ratio-fill" style={{ width: `${avoidedRatio() * 100}%` }} />
         </div>
-        <span class="ratio-label">Avoidance rate: {(avoidedRatio() * 100).toFixed(1)}%</span>
+        <span class="ratio-label">Avoidance rate: {(avoidedRatio() * 100).toFixed(prec())}%</span>
       </div>
     </div>
   );
