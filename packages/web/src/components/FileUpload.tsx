@@ -87,11 +87,12 @@ export default function FileUpload(props: FileUploadProps) {
             onPaste={e => {
               const text = e.clipboardData?.getData('text');
               if (!text) return;
-              e.preventDefault();
               try {
                 JSON.parse(text);
+                e.preventDefault();
                 props.onTextLoad(text);
               } catch {
+                setTextInput(text);
                 setError('Invalid JSON in clipboard');
               }
             }}

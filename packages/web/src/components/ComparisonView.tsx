@@ -195,6 +195,22 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
         </div>
       </Show>
 
+      <Show when={props.entries.length > 0}>
+        <div class="snapshots-list">
+          <h4>Saved Snapshots</h4>
+          <For each={props.entries}>
+            {entry => (
+              <div class="snapshot-item">
+                <span class="snapshot-name">{entry.name}</span>
+                <button class="delete-btn" onClick={() => props.onDelete(entry.id)}>
+                  <XIcon size={16} />
+                </button>
+              </div>
+            )}
+          </For>
+        </div>
+      </Show>
+
       <Show
         when={props.entries.length >= 2}
         fallback={
@@ -215,22 +231,6 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
           </div>
         }
       >
-        <Show when={props.entries.length > 0}>
-          <div class="snapshots-list">
-            <h4>Saved Snapshots</h4>
-            <For each={props.entries}>
-              {entry => (
-                <div class="snapshot-item">
-                  <span class="snapshot-name">{entry.name}</span>
-                  <button class="delete-btn" onClick={() => props.onDelete(entry.id)}>
-                    <XIcon size={16} />
-                  </button>
-                </div>
-              )}
-            </For>
-          </div>
-        </Show>
-
         <Show
           when={leftEntry() && rightEntry()}
           fallback={
