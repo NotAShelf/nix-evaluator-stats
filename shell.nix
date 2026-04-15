@@ -3,5 +3,6 @@ pkgs.mkShell {
   packages = [
     pkgs.nodejs-slim
     pkgs.pnpm
+    pkgs.go
   ];
 }

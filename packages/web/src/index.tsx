@@ -38,6 +38,13 @@ function App() {
 
   // Load from localStorage on mount
   onMount(() => {
+    const query = window.location.search;
+    const urlParams = new URLSearchParams(query);
+
+    const file = urlParams.get('file');
+    if (file) {
+      loadFromText(atob(file));
+    }
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
