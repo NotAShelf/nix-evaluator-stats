@@ -66,6 +66,12 @@ analysis you may compare two _named_ analyses at a time.
 > UI bugs or areas where UI polish is very clearly missing. Please crate an
 > issue if the generated graph or the site UI looks off. Thanks :)
 
+### CLI
+
+1. Create the JSON export or display the text in terminal and pass it into the cli
+
+Kongratz it creates a Temp server with a link to ur benchmark visualization
+
 #### Snapshots
 
 Snapshots are an "experimental" (just means they're new and unpolished) feature
@@ -90,6 +96,9 @@ $ pnpm run dev
 
 # Build a static site
 $ pnpm run build
+
+# Build the cli
+$ pnpm run build:cli
 ```
 
 If submitting pull requests, please ensure that format (`pnpm run fmt`) and lint
