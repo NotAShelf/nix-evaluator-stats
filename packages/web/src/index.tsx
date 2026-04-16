@@ -4,8 +4,16 @@ import SaveIcon from 'lucide-solid/icons/save';
 import UploadIcon from 'lucide-solid/icons/upload';
 import Trash2Icon from 'lucide-solid/icons/trash-2';
 import XIcon from 'lucide-solid/icons/x';
+import ShareIcon from 'lucide-solid/icons/link-2';
 import FileUpload from './components/FileUpload';
-import { StatsData, ComparisonEntry, parseStats } from '@ns/core';
+import {
+  StatsData,
+  ComparisonEntry,
+  parseStats,
+  encodeShareUrl,
+  decodeShareUrl,
+  ShareState,
+} from '@ns/core';
 import './styles.css';
 
 function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
@@ -35,6 +43,9 @@ function App() {
   const [isLoading, setIsLoading] = createSignal(true);
   const [showOverrideModal, setShowOverrideModal] = createSignal(false);
   const [pendingOverrideText, setPendingOverrideText] = createSignal('');
+  const [showShareToast, setShowShareToast] = createSignal(false);
+  const [initialLeftId, setInitialLeftId] = createSignal<number | null>(null);
+  const [initialRightId, setInitialRightId] = createSignal<number | null>(null);
 
   const STORAGE_KEY = 'ns-data';
 
@@ -71,6 +82,51 @@ function App() {
     } catch (e) {
       console.warn('Failed to load saved data:', e);
     }
+
+    const params = new URLSearchParams(window.location.search);
+    const shareParam = params.get('share');
+    if (shareParam) {
+      const shareState = decodeShareUrl(shareParam);
+      if (shareState) {
+        try {
+          if (shareState.type === 'analysis') {
+            const data = parseStats(shareState.data);
+            setCurrentStats(data);
+            setCurrentRaw(shareState.data);
+            setSnapshotName(shareState.name);
+            setView('analysis');
+            window.history.replaceState({}, '', window.location.pathname);
+          } else if (shareState.type === 'compare') {
+            const leftData = parseStats(shareState.left);
+            const rightData = parseStats(shareState.right);
+            const leftId = Date.now();
+            const rightId = Date.now() + 1;
+            const leftEntry: ComparisonEntry = {
+              id: leftId,
+              name: shareState.leftName,
+              data: leftData,
+              raw: shareState.left,
+              timestamp: new Date(),
+            };
+            const rightEntry: ComparisonEntry = {
+              id: rightId,
+              name: shareState.rightName,
+              data: rightData,
+              raw: shareState.right,
+              timestamp: new Date(),
+            };
+            setSnapshots([leftEntry, rightEntry]);
+            setInitialLeftId(leftId);
+            setInitialRightId(rightId);
+            setView('compare');
+            window.history.replaceState({}, '', window.location.pathname);
+          }
+        } catch (e) {
+          console.warn('Failed to load shared data:', e);
+        }
+      }
+    }
+
     setIsLoading(false);
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -166,6 +222,25 @@ function App() {
     setShowSaveDialog(false);
   };
 
+  const shareAnalysis = () => {
+    const stats = currentStats();
+    const raw = currentRaw();
+    if (!stats || !raw) return;
+    const name = snapshotName().trim() || `Analysis ${Date.now()}`;
+    const state: ShareState = { type: 'analysis', data: raw, name };
+    const encoded = encodeShareUrl(state);
+    const url = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setShowShareToast(true);
+        setTimeout(() => setShowShareToast(false), 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy share URL:', err);
+      });
+  };
+
   const deleteSnapshot = (id: number) => {
     setSnapshots(prev => prev.filter(e => e.id !== id));
   };
@@ -246,6 +321,27 @@ function App() {
     } catch (e) {
       console.error('Failed to parse stats:', e);
     }
+  };
+
+  const handleGenerateShareUrl = (left: ComparisonEntry, right: ComparisonEntry) => {
+    const state: ShareState = {
+      type: 'compare',
+      left: left.raw,
+      right: right.raw,
+      leftName: left.name,
+      rightName: right.name,
+    };
+    const encoded = encodeShareUrl(state);
+    const url = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setShowShareToast(true);
+        setTimeout(() => setShowShareToast(false), 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy share URL:', err);
+      });
   };
 
   return (
@@ -364,6 +460,13 @@ function App() {
               onPasteStats={handlePasteStats}
               onFileLoad={handleCompareFileLoad}
               onTextLoad={handleCompareTextLoad}
+              onGenerateShareUrl={handleGenerateShareUrl}
+              initialLeftId={initialLeftId()}
+              initialRightId={initialRightId()}
+              onInitialSelectionUsed={() => {
+                setInitialLeftId(null);
+                setInitialRightId(null);
+              }}
             />
           </Show>
         </Show>
@@ -429,10 +532,17 @@ function App() {
           >
             <SaveIcon size={20} />
           </button>
+          <button class="action-btn share" onClick={shareAnalysis} title="Share Analysis">
+            <ShareIcon size={20} />
+          </button>
           <button class="action-btn clear" onClick={() => setCurrentStats(null)} title="Load New">
             <UploadIcon size={20} />
           </button>
         </div>
+      </Show>
+
+      <Show when={showShareToast()}>
+        <div class="toast">Share URL copied to clipboard!</div>
       </Show>
     </div>
   );

@@ -5,6 +5,7 @@ import ArrowRightIcon from 'lucide-solid/icons/arrow-right';
 import ArrowDownIcon from 'lucide-solid/icons/arrow-down';
 import ArrowUpIcon from 'lucide-solid/icons/arrow-up';
 import XIcon from 'lucide-solid/icons/x';
+import ShareIcon from 'lucide-solid/icons/share';
 import FileUpload from './FileUpload';
 
 interface ComparisonViewProps {
@@ -17,6 +18,10 @@ interface ComparisonViewProps {
   onPasteStats: (text: string, name: string) => ComparisonEntry | null;
   onFileLoad: (data: StatsData, raw: Record<string, unknown>) => void;
   onTextLoad: (text: string) => void;
+  onGenerateShareUrl: (left: ComparisonEntry, right: ComparisonEntry) => void;
+  initialLeftId?: number | null;
+  initialRightId?: number | null;
+  onInitialSelectionUsed?: () => void;
 }
 
 const ComparisonView: Component<ComparisonViewProps> = props => {
@@ -47,6 +52,22 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
 
   onMount(() => {
     document.addEventListener('paste', handlePaste);
+
+    if (props.initialLeftId !== null && props.initialLeftId !== undefined) {
+      const left = props.entries.find(e => e.id === props.initialLeftId);
+      if (left) {
+        setLeftEntry(left);
+      }
+    }
+    if (props.initialRightId !== null && props.initialRightId !== undefined) {
+      const right = props.entries.find(e => e.id === props.initialRightId);
+      if (right) {
+        setRightEntry(right);
+      }
+    }
+    if (props.initialLeftId != null || props.initialRightId != null) {
+      props.onInitialSelectionUsed?.();
+    }
   });
 
   onCleanup(() => {
@@ -192,6 +213,16 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
               Replace
             </button>
           </div>
+          <Show when={leftEntry() && rightEntry()}>
+            <button
+              class="share-btn"
+              onClick={() => props.onGenerateShareUrl(leftEntry()!, rightEntry()!)}
+              title="Copy share URL to clipboard"
+            >
+              <ShareIcon size={16} />
+              Share
+            </button>
+          </Show>
         </div>
       </Show>
 
