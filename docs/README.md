@@ -1,4 +1,4 @@
-<!-- markdownlint-disable MD033 -->
+<!-- markdownlint-disable MD033 MD041 -->
 
 <div align="center">
   <h1 id="header">nix-evaluator-stats</h1>
@@ -20,20 +20,28 @@
 
 ![Demo](./assets/ns-demo.png)
 
-`nix-evaluator-stats`, or "ns" for short, is a pretty visualiser for the Nix
-evaluator stats export from `NIX_SHOW_STATS` and `NIX_COUNT_CALLS` invocations.
-It takes the resulting JSON data from your Nix invocation with the relevant
-variables, and provides a ✨ pretty ✨ dashboard-like visual with the ability to
-compare your "snapshots" of benchmarks. Besides looking nice, it is helpful in
+`nix-evaluator-stats`, or "`ns`", is a pretty visualiser for the Nix evaluator
+stats export from `NIX_SHOW_STATS` and `NIX_COUNT_CALLS` invocations. It takes
+the resulting JSON data from your Nix invocation with the relevant variables,
+and provides a ✨ pretty ✨ dashboard-like visual with the ability to compare
+your "snapshots" of benchmarks. Besides looking nice, it is helpful in
 collecting statistics about your Nix commands and tracking performance
-regressions in subsequent exports.
+regressions in subsequent exports with the comparison feature with snapshot of
+your analyses.
 
 ## Usage
 
-NS provides both a web application for pretty visuals, and a terminal client (a
-TUI) for rendering the statistics from your terminal.
+NS is primarily a web application for pretty visuals, with a terminal client
+(both a CLI and a TUI) planned for rendering statistics or sharing your analyses
+with others.
 
 ### Web
+
+<!--markdownlint-disable MD059-->
+
+You can find the site [here](https://notashelf.github.io/nix-evaluator-stats/).
+
+<!--markdownlint-enable MD059-->
 
 Usage instructions are provided in the initial page. Simply navigate to the site
 and provide the JSON export (or a file) to render the statistics. The number of
@@ -61,19 +69,15 @@ Once you hit "Load", the JSON will be parsed and you'll be looking at a dash
 board of your export. By using the snapshot feature, i.e., saving a particular
 analysis you may compare two _named_ analyses at a time.
 
-> [!NOTE]
-> `nix-evaluator-stats` was created in a very short duration, and there might be
-> UI bugs or areas where UI polish is very clearly missing. Please crate an
-> issue if the generated graph or the site UI looks off. Thanks :)
-
 #### Snapshots
 
-Snapshots are an "experimental" (just means they're new and unpolished) feature
-that lets you save an analysis in your browser storage with a name to be used
-later on in the comparison view. At least two **named** analyses (i.e.,
-snapshots) are required for an analysis.
+Snapshots are a new feature that lets you save an analysis in your browser
+storage with a name to be used later on in the comparison view. At least two
+**named** analyses (i.e., snapshots) are required for an analysis.
 
-You can save an analysis as a snapshot from the save button on the bottom right.
+You can save can analysis as a snapshot from the save button on the bottom
+right. Alternatively, you can visit the "compare" page and paste your JSON
+directly.
 
 ## Hacking
 
