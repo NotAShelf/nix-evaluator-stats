@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@ns/core": "workspace:*",
-    "@ns/ui-utils": "workspace:*"
+    "@ns/ui-utils": "workspace:*",
+    "lzutf8": "^0.6.3"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",
