@@ -1,58 +1,20 @@
 import { createSignal, Show, For, onMount, createEffect, lazy } from 'solid-js';
 import { render } from 'solid-js/web';
-import LZUTF8 from 'lzutf8';
 import SaveIcon from 'lucide-solid/icons/save';
 import UploadIcon from 'lucide-solid/icons/upload';
 import Trash2Icon from 'lucide-solid/icons/trash-2';
 import XIcon from 'lucide-solid/icons/x';
 import ShareIcon from 'lucide-solid/icons/link-2';
 import FileUpload from './components/FileUpload';
-import { StatsData, ComparisonEntry, parseStats } from '@ns/core';
+import {
+  StatsData,
+  ComparisonEntry,
+  parseStats,
+  encodeShareUrl,
+  decodeShareUrl,
+  ShareState,
+} from '@ns/core';
 import './styles.css';
-
-type ShareState =
-  | { type: 'analysis'; data: Record<string, unknown>; name: string }
-  | {
-      type: 'compare';
-      left: Record<string, unknown>;
-      right: Record<string, unknown>;
-      leftName: string;
-      rightName: string;
-    };
-
-function encodeShareUrl(state: ShareState): string {
-  const json = JSON.stringify(state);
-  const encoded = LZUTF8.compress(json, { outputEncoding: 'Base64' }) as string;
-  return encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
-function decodeShareUrl(encoded: string): ShareState | null {
-  try {
-    const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
-    const json = LZUTF8.decompress(base64, {
-      inputEncoding: 'Base64',
-      outputEncoding: 'String',
-    }) as string | null;
-    if (!json) {
-      return null;
-    }
-    const state = JSON.parse(json) as ShareState;
-    if (state.type === 'analysis') {
-      if (!state.data || !state.name) {
-        return null;
-      }
-    } else if (state.type === 'compare') {
-      if (!state.left || !state.right || !state.leftName || !state.rightName) {
-        return null;
-      }
-    } else {
-      return null;
-    }
-    return state;
-  } catch {
-    return null;
-  }
-}
 
 function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
   fn: T,
@@ -268,10 +230,15 @@ function App() {
     const state: ShareState = { type: 'analysis', data: raw, name };
     const encoded = encodeShareUrl(state);
     const url = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setShowShareToast(true);
-      setTimeout(() => setShowShareToast(false), 2000);
-    });
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setShowShareToast(true);
+        setTimeout(() => setShowShareToast(false), 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy share URL:', err);
+      });
   };
 
   const deleteSnapshot = (id: number) => {
@@ -366,10 +333,15 @@ function App() {
     };
     const encoded = encodeShareUrl(state);
     const url = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setShowShareToast(true);
-      setTimeout(() => setShowShareToast(false), 2000);
-    });
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setShowShareToast(true);
+        setTimeout(() => setShowShareToast(false), 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy share URL:', err);
+      });
   };
 
   return (

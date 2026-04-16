@@ -65,7 +65,7 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
         setRightEntry(right);
       }
     }
-    if (props.initialLeftId !== null || props.initialRightId !== null) {
+    if (props.initialLeftId != null || props.initialRightId != null) {
       props.onInitialSelectionUsed?.();
     }
   });

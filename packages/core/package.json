@@ -16,5 +16,8 @@
   },
   "devDependencies": {
     "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "lzutf8": "^0.6.3"
   }
 }
