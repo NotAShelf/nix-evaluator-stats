@@ -1,4 +1,4 @@
-import { createSignal, Show, For } from 'solid-js';
+import { createSignal, createUniqueId, Show, For } from 'solid-js';
 import { StatsData, ComparisonEntry } from '@ns/core';
 import BarChart2Icon from 'lucide-solid/icons/bar-chart-2';
 import ClockIcon from 'lucide-solid/icons/clock';
@@ -15,6 +15,7 @@ export default function FileUpload(props: FileUploadProps) {
   const [isTextMode, setIsTextMode] = createSignal(true);
   const [error, setError] = createSignal('');
   const [showHelp, setShowHelp] = createSignal(false);
+  const helpId = createUniqueId();
 
   const handleFile = async (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -48,12 +49,17 @@ export default function FileUpload(props: FileUploadProps) {
         </div>
         <h2>Load Statistics</h2>
 
-        <div class="help-link" onClick={() => setShowHelp(!showHelp())}>
+        <button
+          class="help-link"
+          aria-expanded={showHelp()}
+          aria-controls={helpId}
+          onClick={() => setShowHelp(!showHelp())}
+        >
           How do I use this?
-        </div>
+        </button>
 
         <Show when={showHelp()}>
-          <div class="help-panel">
+          <div class="help-panel" id={helpId}>
             <h4>Generating Stats</h4>
             <code>NIX_SHOW_STATS=1 nix-instantiate expr.nix &gt; stats.json</code>
             <code>NIX_SHOW_STATS=1 NIX_COUNT_CALLS=1 nix-build &gt; stats.json</code>
@@ -112,18 +118,20 @@ export default function FileUpload(props: FileUploadProps) {
               <ClockIcon size={16} />
               Recent Analyses
             </h3>
-            <div class="snapshot-list">
+            <ul class="snapshot-list">
               <For each={props.snapshots}>
                 {entry => (
-                  <div class="snapshot-item" onClick={() => props.onLoadSnapshot?.(entry)}>
-                    <span class="snapshot-name">{entry.name}</span>
-                    <span class="snapshot-date">
-                      {new Date(entry.timestamp).toLocaleDateString()}
-                    </span>
-                  </div>
+                  <li>
+                    <button class="snapshot-item" onClick={() => props.onLoadSnapshot?.(entry)}>
+                      <span class="snapshot-name">{entry.name}</span>
+                      <span class="snapshot-date">
+                        {new Date(entry.timestamp).toLocaleDateString()}
+                      </span>
+                    </button>
+                  </li>
                 )}
               </For>
-            </div>
+            </ul>
           </div>
         </Show>
       </div>

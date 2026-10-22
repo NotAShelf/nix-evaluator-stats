@@ -43,6 +43,18 @@ body {
   line-height: 1.5;
 }
 
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
 .app {
   min-height: 100vh;
   display: flex;
@@ -230,12 +242,22 @@ body {
 }
 
 .file-input-label {
+  position: relative;
   display: inline-block;
   cursor: pointer;
 }
 
 .file-input-label input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.file-input-label:focus-within span {
+  outline: 2px solid var(--accent-hover);
+  outline-offset: 2px;
 }
 
 .file-input-label span {
@@ -319,19 +341,19 @@ body {
   gap: 0.5rem;
 }
 
-.snapshot-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.snapshot-list .snapshot-item {
+  width: 100%;
+  gap: 1rem;
   padding: 0.75rem 1rem;
-  background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.snapshot-item:hover {
+.snapshot-list .snapshot-item:hover {
   background: var(--bg-secondary);
   border-color: var(--accent);
 }
@@ -573,10 +595,17 @@ body {
 
 .snapshot-info {
   flex: 1;
+  min-width: 0;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
 }
 
 .snapshot-name {
@@ -622,6 +651,9 @@ body {
   cursor: pointer;
   margin-bottom: 2rem;
   display: inline-block;
+  padding: 0.25rem;
+  background: none;
+  border: none;
 }
 
 .help-link:hover {

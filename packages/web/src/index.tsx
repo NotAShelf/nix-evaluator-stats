@@ -493,24 +493,24 @@ function App() {
           large
           closeButton
         >
-          <div class="snapshot-list-manage">
-            <For each={snapshots()} fallback={<div class="empty-state">No snapshots saved</div>}>
+          <ul class="snapshot-list-manage">
+            <For each={snapshots()} fallback={<li class="empty-state">No snapshots saved</li>}>
               {entry => (
-                <div class="snapshot-manage-item">
-                  <div class="snapshot-info" onClick={() => loadSnapshot(entry)}>
+                <li class="snapshot-manage-item">
+                  <button class="snapshot-info" onClick={() => loadSnapshot(entry)}>
                     <span class="snapshot-name">{entry.name}</span>
                     <span class="snapshot-date">
                       {new Date(entry.timestamp).toLocaleDateString()}{' '}
                       {new Date(entry.timestamp).toLocaleTimeString()}
                     </span>
-                  </div>
+                  </button>
                   <button class="delete-btn" onClick={() => deleteSnapshot(entry.id)}>
                     <XIcon size={16} />
                   </button>
-                </div>
+                </li>
               )}
             </For>
-          </div>
+          </ul>
           <Show when={snapshots().length > 0}>
             <div class="modal-actions">
               <button class="danger-btn" onClick={clearAllSnapshots}>
