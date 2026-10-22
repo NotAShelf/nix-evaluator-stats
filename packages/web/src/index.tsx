@@ -269,6 +269,7 @@ function App() {
 
   const loadSnapshot = (entry: ComparisonEntry) => {
     setCurrentStats(entry.data);
+    setCurrentRaw(entry.raw);
     setView('analysis');
     setShowManageSnapshots(false);
   };
