@@ -44,6 +44,7 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
 }
 
 button,
@@ -143,10 +144,13 @@ ol {
 
 .nav {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.5rem;
 }
 
 .nav button {
+  min-height: 2.25rem;
   padding: 0.5rem 1rem;
   background: transparent;
   border: 1px solid var(--border-color);
@@ -417,7 +421,7 @@ ol {
 
 .header-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
   gap: 1rem;
 }
 
@@ -485,6 +489,7 @@ ol {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 1rem;
 }
 
 .modal {
@@ -492,7 +497,9 @@ ol {
   border: 1px solid var(--border-color);
   border-radius: 1rem;
   padding: 2rem;
-  min-width: 360px;
+  width: min(360px, 100%);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
 }
 
 .modal:focus {
@@ -500,9 +507,7 @@ ol {
 }
 
 .modal-large {
-  min-width: 480px;
-  max-width: 90vw;
-  max-height: 80vh;
+  width: min(480px, 100%);
   display: flex;
   flex-direction: column;
 }
@@ -525,7 +530,8 @@ ol {
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.5rem;
+  margin: -0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -563,6 +569,7 @@ ol {
 
 .modal-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   justify-content: flex-end;
   margin-top: 1.5rem;
@@ -721,6 +728,7 @@ ol {
   font-size: 0.75rem;
   color: var(--accent-text);
   margin-bottom: 0.5rem;
+  overflow-wrap: anywhere;
 }
 
 .help-panel p {
@@ -762,11 +770,14 @@ ol {
 .snapshot-name {
   font-size: 0.875rem;
   color: var(--text-primary);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .delete-btn {
-  width: 24px;
-  height: 24px;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -794,12 +805,12 @@ ol {
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
   gap: 1rem;
 }
 
 .metrics-grid.small {
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(120px, 100%), 1fr));
 }
 
 .metric-card {
@@ -932,7 +943,7 @@ ol {
 
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 1.5rem;
 }
 
@@ -950,8 +961,9 @@ ol {
 
 /* Memory Donut Chart */
 .memory-chart {
-  display: grid;
-  grid-template-columns: 1fr 180px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1.5rem;
   align-items: center;
 }
@@ -996,6 +1008,8 @@ ol {
 }
 
 .chart-legend {
+  flex: 1 1 15rem;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -1003,7 +1017,7 @@ ol {
 
 .legend-item {
   display: grid;
-  grid-template-columns: 12px 1fr auto auto;
+  grid-template-columns: 12px minmax(0, 1fr) auto auto;
   gap: 0.75rem;
   align-items: center;
   font-size: 0.8125rem;
@@ -1039,8 +1053,7 @@ ol {
   color: var(--text-primary);
   font-family: var(--font-nums);
   font-variant-numeric: tabular-nums;
-  word-break: break-word;
-  overflow-wrap: break-word;
+  white-space: nowrap;
 }
 
 .legend-percent {
@@ -1050,6 +1063,10 @@ ol {
   min-width: 40px;
   word-break: break-word;
   overflow-wrap: break-word;
+}
+
+.donut-chart {
+  flex: 0 1 180px;
 }
 
 .donut-chart svg {
@@ -1104,7 +1121,7 @@ ol {
 
 .time-bar-row {
   display: grid;
-  grid-template-columns: 100px 1fr 70px;
+  grid-template-columns: 100px minmax(0, 1fr) minmax(70px, auto);
   gap: 1rem;
   align-items: center;
 }
@@ -1142,7 +1159,6 @@ ol {
   font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
   color: var(--text-secondary);
-  min-width: 80px;
   text-align: right;
   word-break: break-word;
   overflow-wrap: break-word;
@@ -1150,7 +1166,8 @@ ol {
 
 .gc-stats {
   display: flex;
-  gap: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--border-color);
 }
@@ -1186,7 +1203,7 @@ ol {
 
 .op-row {
   display: grid;
-  grid-template-columns: 110px 1fr 80px;
+  grid-template-columns: 110px minmax(0, 1fr) minmax(80px, auto);
   gap: 1rem;
   align-items: center;
 }
@@ -1250,7 +1267,7 @@ ol {
 
 .thunk-row {
   display: grid;
-  grid-template-columns: 70px 1fr 80px;
+  grid-template-columns: 70px minmax(0, 1fr) minmax(80px, auto);
   gap: 1rem;
   align-items: center;
 }
@@ -1322,7 +1339,7 @@ ol {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
   gap: 1.5rem;
 }
 
@@ -1335,7 +1352,7 @@ ol {
 
 .top-item {
   display: grid;
-  grid-template-columns: 32px 1fr auto auto;
+  grid-template-columns: 32px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 1rem;
   padding: 0.75rem;
@@ -1360,6 +1377,7 @@ ol {
   font-size: 0.8125rem;
   color: var(--text-primary);
   font-family: 'SF Mono', Monaco, monospace;
+  overflow-wrap: anywhere;
 }
 
 .top-item .count {
@@ -1375,6 +1393,8 @@ ol {
 .top-item .location {
   font-size: 0.75rem;
   color: var(--text-muted);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 /* Comparison View */
@@ -1386,12 +1406,14 @@ ol {
 
 .comparison-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   gap: 1rem;
 }
 
 .compare-selector {
-  flex: 1;
+  flex: 1 1 12rem;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -1482,7 +1504,7 @@ ol {
 
 .compare-placeholder {
   text-align: center;
-  padding: 4rem;
+  padding: 4rem 1.5rem;
   color: var(--text-muted);
   background: var(--card-bg);
   border: 1px dashed var(--border-color);
@@ -1512,12 +1534,17 @@ ol {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 0.75rem;
-  overflow: hidden;
+  overflow-x: auto;
+}
+
+.compare-header,
+.compare-row {
+  min-width: 32rem;
 }
 
 .compare-header {
   display: grid;
-  grid-template-columns: 1fr 140px 140px 100px;
+  grid-template-columns: minmax(8rem, 1fr) 140px 140px 100px;
   gap: 1rem;
   padding: 1rem 1.25rem;
   background: var(--bg-tertiary);
@@ -1530,7 +1557,7 @@ ol {
 
 .compare-row {
   display: grid;
-  grid-template-columns: 1fr 140px 140px 100px;
+  grid-template-columns: minmax(8rem, 1fr) 140px 140px 100px;
   gap: 1rem;
   padding: 0.875rem 1.25rem;
   border-bottom: 1px solid var(--border-color);
@@ -1625,6 +1652,7 @@ ol {
 
 .comparison-summary {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
 }
 
@@ -1649,9 +1677,14 @@ ol {
 /* Responsive */
 @media (max-width: 768px) {
   .header {
+    position: static;
     flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .compare-arrow {
+    display: none;
   }
 
   .main {
@@ -1670,16 +1703,35 @@ ol {
 
   .compare-header,
   .compare-row {
-    grid-template-columns: 1fr 100px 80px;
+    grid-template-columns: minmax(7rem, 1fr) 110px 110px 80px;
+    gap: 0.75rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
-  .compare-header .col-label,
-  .compare-row .col-label {
-    max-width: 120px;
+  .upload-container {
+    padding-top: 1rem;
+  }
+
+  .upload-card {
+    padding: 2rem 1.25rem;
+  }
+
+  .modal {
+    padding: 1.5rem;
+  }
+
+  .compare-paste-toggle {
+    padding: 0;
+  }
+
+  .footer {
+    padding: 0.75rem 1rem;
   }
 
   .top-item {
-    grid-template-columns: 24px 1fr auto;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    gap: 0.75rem;
   }
 
   .top-item .location {
@@ -1687,7 +1739,25 @@ ol {
   }
 }
 
+@media (max-width: 480px) {
+  .time-bar-row,
+  .op-row,
+  .thunk-row {
+    grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+    gap: 0.75rem;
+  }
+
+  .header-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metric-value {
+    font-size: 1.25rem;
+  }
+}
+
 .precision-select {
+  min-height: 2.25rem;
   padding: 0.5rem 1.5rem 0.5rem 0.75rem;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
