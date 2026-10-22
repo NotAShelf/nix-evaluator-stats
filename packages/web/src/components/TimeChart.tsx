@@ -16,9 +16,9 @@ const TimeChart: Component<TimeChartProps> = props => {
     const other = Math.max(0, cpu - gc - gcNonInc);
 
     return [
-      { label: 'Evaluation', value: other, colorClass: 'chart-1' },
-      { label: 'Incremental GC', value: gc, colorClass: 'chart-gc' },
-      { label: 'Full GC', value: gcNonInc, colorClass: 'chart-gc-full' },
+      { label: 'Evaluation', value: other, series: 'eval' },
+      { label: 'Incremental GC', value: gc, series: 'gc' },
+      { label: 'Full GC', value: gcNonInc, series: 'gc-full' },
     ].filter(d => d.value > 0);
   });
 
@@ -41,7 +41,7 @@ const TimeChart: Component<TimeChartProps> = props => {
               <div class="time-bar-track" aria-hidden="true">
                 <div
                   class="time-bar-fill"
-                  classList={{ [item.colorClass]: true }}
+                  data-series={item.series}
                   style={{
                     width: `${item.percent}%`,
                   }}

@@ -11,11 +11,11 @@ const OperationsChart: Component<OperationsChartProps> = props => {
   const prec = () => props.precision ?? 2;
   const operations = createMemo(() =>
     [
-      { label: 'Lookups', value: props.stats.nrLookups, colorClass: 'chart-1' },
-      { label: 'Function Calls', value: props.stats.nrFunctionCalls, colorClass: 'chart-2' },
-      { label: 'PrimOp Calls', value: props.stats.nrPrimOpCalls, colorClass: 'chart-3' },
-      { label: 'Op Updates', value: props.stats.nrOpUpdates, colorClass: 'chart-4' },
-      { label: 'Values Copied', value: props.stats.nrOpUpdateValuesCopied, colorClass: 'chart-5' },
+      { label: 'Lookups', value: props.stats.nrLookups, series: 'lookups' },
+      { label: 'Function Calls', value: props.stats.nrFunctionCalls, series: 'calls' },
+      { label: 'PrimOp Calls', value: props.stats.nrPrimOpCalls, series: 'primops' },
+      { label: 'Op Updates', value: props.stats.nrOpUpdates, series: 'updates' },
+      { label: 'Values Copied', value: props.stats.nrOpUpdateValuesCopied, series: 'copied' },
     ].sort((a, b) => b.value - a.value),
   );
 
@@ -30,7 +30,7 @@ const OperationsChart: Component<OperationsChartProps> = props => {
             <div class="op-bar-container" aria-hidden="true">
               <div
                 class="op-bar"
-                classList={{ [item.colorClass]: true }}
+                data-series={item.series}
                 style={{
                   width: `${maxValue() > 0 ? (item.value / maxValue()) * 100 : 0}%`,
                 }}

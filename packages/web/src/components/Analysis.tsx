@@ -57,30 +57,13 @@ const Analysis: Component<{ stats: StatsData; precision?: number }> = props => {
       props.stats.sets.bytes,
   );
 
-  const memoryBreakdown = createMemo(() =>
-    [
-      { label: 'Envs', value: props.stats.envs.bytes, total: totalMemory(), colorClass: 'chart-1' },
-      {
-        label: 'Lists',
-        value: props.stats.list.bytes,
-        total: totalMemory(),
-        colorClass: 'chart-2',
-      },
-      {
-        label: 'Values',
-        value: props.stats.values.bytes,
-        total: totalMemory(),
-        colorClass: 'chart-3',
-      },
-      {
-        label: 'Symbols',
-        value: props.stats.symbols.bytes,
-        total: totalMemory(),
-        colorClass: 'chart-4',
-      },
-      { label: 'Sets', value: props.stats.sets.bytes, total: totalMemory(), colorClass: 'chart-5' },
-    ].sort((a, b) => b.value - a.value),
-  );
+  const memoryBreakdown = createMemo(() => [
+    { label: 'Envs', value: props.stats.envs.bytes, category: 'envs' as const },
+    { label: 'Lists', value: props.stats.list.bytes, category: 'lists' as const },
+    { label: 'Values', value: props.stats.values.bytes, category: 'values' as const },
+    { label: 'Symbols', value: props.stats.symbols.bytes, category: 'symbols' as const },
+    { label: 'Sets', value: props.stats.sets.bytes, category: 'sets' as const },
+  ]);
 
   const topPrimops = createMemo(() => {
     if (!props.stats.primops) return [];

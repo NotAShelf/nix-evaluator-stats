@@ -23,7 +23,8 @@ const ThunkChart: Component<ThunkChartProps> = props => {
           <div class="thunk-label">Created</div>
           <div class="thunk-bar-container" aria-hidden="true">
             <div
-              class="thunk-bar created"
+              class="thunk-bar"
+              data-series="created"
               style={{
                 width: `${maxValue() > 0 ? (props.stats.nrThunks / maxValue()) * 100 : 0}%`,
               }}
@@ -35,7 +36,8 @@ const ThunkChart: Component<ThunkChartProps> = props => {
           <div class="thunk-label">Avoided</div>
           <div class="thunk-bar-container" aria-hidden="true">
             <div
-              class="thunk-bar avoided"
+              class="thunk-bar"
+              data-series="avoided"
               style={{
                 width: `${maxValue() > 0 ? (props.stats.nrAvoided / maxValue()) * 100 : 0}%`,
               }}
