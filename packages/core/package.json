@@ -8,6 +8,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./share": {
+      "types": "./dist/share.d.ts",
+      "default": "./dist/share.js"
     }
   },
   "scripts": {

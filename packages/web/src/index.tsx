@@ -6,15 +6,12 @@ import Trash2Icon from 'lucide-solid/icons/trash-2';
 import XIcon from 'lucide-solid/icons/x';
 import ShareIcon from 'lucide-solid/icons/link-2';
 import FileUpload from './components/FileUpload';
-import {
-  StatsData,
-  ComparisonEntry,
-  parseStats,
-  encodeShareUrl,
-  decodeShareUrl,
-  ShareState,
-} from '@ns/core';
+import { StatsData, ComparisonEntry, parseStats, ShareState } from '@ns/core';
 import './styles.css';
+
+// lzutf8 and its stream/buffer polyfills dominate the bundle, so share links
+// load it on demand instead of on every visit.
+const loadShare = () => import('@ns/core/share');
 
 function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
   fn: T,
@@ -85,7 +82,8 @@ function App() {
 
     const params = new URLSearchParams(window.location.search);
     const shareParam = params.get('share');
-    if (shareParam) {
+    const loadShared = async (shareParam: string) => {
+      const { decodeShareUrl } = await loadShare();
       const shareState = decodeShareUrl(shareParam);
       if (shareState) {
         try {
@@ -125,9 +123,15 @@ function App() {
           console.warn('Failed to load shared data:', e);
         }
       }
-    }
+    };
 
-    setIsLoading(false);
+    if (shareParam) {
+      loadShared(shareParam)
+        .catch(e => console.warn('Failed to load shared data:', e))
+        .finally(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
+    }
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -222,23 +226,25 @@ function App() {
     setShowSaveDialog(false);
   };
 
+  const copyShareUrl = async (state: ShareState) => {
+    try {
+      const { encodeShareUrl } = await loadShare();
+      const encoded = encodeShareUrl(state);
+      const url = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
+      await navigator.clipboard.writeText(url);
+      setShowShareToast(true);
+      setTimeout(() => setShowShareToast(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy share URL:', err);
+    }
+  };
+
   const shareAnalysis = () => {
     const stats = currentStats();
     const raw = currentRaw();
     if (!stats || !raw) return;
     const name = snapshotName().trim() || `Analysis ${Date.now()}`;
-    const state: ShareState = { type: 'analysis', data: raw, name };
-    const encoded = encodeShareUrl(state);
-    const url = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
-    navigator.clipboard
-      .writeText(url)
-      .then(() => {
-        setShowShareToast(true);
-        setTimeout(() => setShowShareToast(false), 2000);
-      })
-      .catch(err => {
-        console.error('Failed to copy share URL:', err);
-      });
+    copyShareUrl({ type: 'analysis', data: raw, name });
   };
 
   const deleteSnapshot = (id: number) => {
@@ -331,17 +337,7 @@ function App() {
       leftName: left.name,
       rightName: right.name,
     };
-    const encoded = encodeShareUrl(state);
-    const url = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
-    navigator.clipboard
-      .writeText(url)
-      .then(() => {
-        setShowShareToast(true);
-        setTimeout(() => setShowShareToast(false), 2000);
-      })
-      .catch(err => {
-        console.error('Failed to copy share URL:', err);
-      });
+    copyShareUrl(state);
   };
 
   return (

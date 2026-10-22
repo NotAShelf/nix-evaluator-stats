@@ -1,3 +1,3 @@
 export * from './types';
 export * from './parser';
-export * from './share';
+export type { ShareState } from './share';
