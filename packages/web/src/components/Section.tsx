@@ -1,4 +1,4 @@
-import { Component, createSignal, type JSX, Show } from 'solid-js';
+import { Component, createSignal, createUniqueId, type JSX, Show } from 'solid-js';
 import ChevronDownIcon from 'lucide-solid/icons/chevron-down';
 
 interface SectionProps {
@@ -10,19 +10,29 @@ interface SectionProps {
 
 const Section: Component<SectionProps> = props => {
   const [collapsed, setCollapsed] = createSignal(props.defaultCollapsed || false);
+  const contentId = createUniqueId();
 
   return (
-    <div class={`section ${collapsed() ? 'collapsed' : ''}`}>
+    <section class={`section ${collapsed() ? 'collapsed' : ''}`} aria-label={props.title}>
       <Show when={props.collapsible}>
-        <button class="section-header" onClick={() => setCollapsed(!collapsed())}>
-          <span class="section-title">{props.title}</span>
-          <ChevronDownIcon size={16} class="section-toggle" />
-        </button>
+        <h2 class="section-heading">
+          <button
+            class="section-header"
+            aria-expanded={!collapsed()}
+            aria-controls={contentId}
+            onClick={() => setCollapsed(!collapsed())}
+          >
+            <span class="section-title">{props.title}</span>
+            <ChevronDownIcon size={16} class="section-toggle" aria-hidden="true" />
+          </button>
+        </h2>
       </Show>
       <Show when={!props.collapsible || !collapsed()}>
-        <div class="section-content">{props.children}</div>
+        <div class="section-content" id={contentId}>
+          {props.children}
+        </div>
       </Show>
-    </div>
+    </section>
   );
 };
 

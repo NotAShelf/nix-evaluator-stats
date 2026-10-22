@@ -38,7 +38,7 @@ const TimeChart: Component<TimeChartProps> = props => {
           {item => (
             <div class="time-bar-row">
               <div class="time-bar-label">{item.label}</div>
-              <div class="time-bar-track">
+              <div class="time-bar-track" aria-hidden="true">
                 <div
                   class="time-bar-fill"
                   classList={{ [item.colorClass]: true }}

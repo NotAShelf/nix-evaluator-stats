@@ -21,7 +21,7 @@ const ThunkChart: Component<ThunkChartProps> = props => {
       <div class="thunk-bars">
         <div class="thunk-row">
           <div class="thunk-label">Created</div>
-          <div class="thunk-bar-container">
+          <div class="thunk-bar-container" aria-hidden="true">
             <div
               class="thunk-bar created"
               style={{
@@ -33,7 +33,7 @@ const ThunkChart: Component<ThunkChartProps> = props => {
         </div>
         <div class="thunk-row">
           <div class="thunk-label">Avoided</div>
-          <div class="thunk-bar-container">
+          <div class="thunk-bar-container" aria-hidden="true">
             <div
               class="thunk-bar avoided"
               style={{
@@ -46,7 +46,7 @@ const ThunkChart: Component<ThunkChartProps> = props => {
       </div>
 
       <div class="thunk-ratio">
-        <div class="ratio-bar">
+        <div class="ratio-bar" aria-hidden="true">
           <div class="ratio-fill" style={{ width: `${avoidedRatio() * 100}%` }} />
         </div>
         <span class="ratio-label">

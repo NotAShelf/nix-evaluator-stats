@@ -234,36 +234,40 @@ const Analysis: Component<{ stats: StatsData; precision?: number }> = props => {
 
       <Show when={topPrimops().length > 0}>
         <Section title="Top Primitive Operations" collapsible>
-          <div class="top-list">
+          <ol class="top-list">
             <For each={topPrimops()}>
               {(item, i) => (
-                <div class="top-item">
-                  <span class="rank">{i() + 1}</span>
+                <li class="top-item">
+                  <span class="rank" aria-hidden="true">
+                    {i() + 1}
+                  </span>
                   <span class="name">{item.name}</span>
                   <span class="count">{formatNumber(item.count, prec())}</span>
-                </div>
+                </li>
               )}
             </For>
-          </div>
+          </ol>
         </Section>
       </Show>
 
       <Show when={topFunctions().length > 0}>
         <Section title="Top Function Calls" collapsible>
-          <div class="top-list">
+          <ol class="top-list">
             <For each={topFunctions()}>
               {(item, i) => (
-                <div class="top-item">
-                  <span class="rank">{i() + 1}</span>
+                <li class="top-item">
+                  <span class="rank" aria-hidden="true">
+                    {i() + 1}
+                  </span>
                   <span class="name">{item.name || '<lambda>'}</span>
                   <span class="count">{formatNumber(item.count, prec())}</span>
                   <span class="location">
                     {item.file}:{item.line}
                   </span>
-                </div>
+                </li>
               )}
             </For>
-          </div>
+          </ol>
         </Section>
       </Show>
 
@@ -296,19 +300,21 @@ const Analysis: Component<{ stats: StatsData; precision?: number }> = props => {
 
       <Show when={topAttributes().length > 0}>
         <Section title="Top Attribute Selections" collapsible>
-          <div class="top-list">
+          <ol class="top-list">
             <For each={topAttributes()}>
               {(item, i) => (
-                <div class="top-item">
-                  <span class="rank">{i() + 1}</span>
+                <li class="top-item">
+                  <span class="rank" aria-hidden="true">
+                    {i() + 1}
+                  </span>
                   <span class="location">
                     {item.file}:{item.line}
                   </span>
                   <span class="count">{formatNumber(item.count, prec())}</span>
-                </div>
+                </li>
               )}
             </For>
-          </div>
+          </ol>
         </Section>
       </Show>
     </div>

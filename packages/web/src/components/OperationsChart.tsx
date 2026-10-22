@@ -27,7 +27,7 @@ const OperationsChart: Component<OperationsChartProps> = props => {
         {item => (
           <div class="op-row">
             <div class="op-label">{item.label}</div>
-            <div class="op-bar-container">
+            <div class="op-bar-container" aria-hidden="true">
               <div
                 class="op-bar"
                 classList={{ [item.colorClass]: true }}

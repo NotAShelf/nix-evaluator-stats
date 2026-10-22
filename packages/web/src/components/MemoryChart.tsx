@@ -54,11 +54,19 @@ const MemoryChart: Component<MemoryChartProps> = props => {
 
   return (
     <div class="memory-chart">
-      <div class="chart-legend">
+      <div
+        class="chart-legend"
+        role="list"
+        aria-label={`Memory distribution, total ${formatBytes(props.data.reduce((sum, d) => sum + d.value, 0))}`}
+      >
         <For each={chartData()}>
           {item => (
-            <div class="legend-item">
-              <span class="legend-color" classList={{ [item.colorClass]: true }} />
+            <div class="legend-item" role="listitem">
+              <span
+                class="legend-color"
+                classList={{ [item.colorClass]: true }}
+                aria-hidden="true"
+              />
               <span class="legend-label">{item.label}</span>
               <span class="legend-value">{formatBytes(item.value)}</span>
               <span class="legend-percent">{item.percentage}%</span>
@@ -66,7 +74,7 @@ const MemoryChart: Component<MemoryChartProps> = props => {
           )}
         </For>
       </div>
-      <div class="donut-chart">
+      <div class="donut-chart" aria-hidden="true">
         <svg viewBox="0 0 200 200">
           <For each={chartData()}>
             {item => (

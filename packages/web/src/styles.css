@@ -863,6 +863,11 @@ ol {
   overflow: hidden;
 }
 
+.section-heading {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
 .section-header {
   width: 100%;
   display: flex;
