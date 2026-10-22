@@ -1,4 +1,4 @@
-import { createSignal, Show, For, onMount, createEffect, lazy } from 'solid-js';
+import { createSignal, Show, For, onMount, onCleanup, createEffect, lazy } from 'solid-js';
 import { render } from 'solid-js/web';
 import SaveIcon from 'lucide-solid/icons/save';
 import UploadIcon from 'lucide-solid/icons/upload';
@@ -6,6 +6,7 @@ import Trash2Icon from 'lucide-solid/icons/trash-2';
 import XIcon from 'lucide-solid/icons/x';
 import ShareIcon from 'lucide-solid/icons/link-2';
 import FileUpload from './components/FileUpload';
+import Modal from './components/Modal';
 import { StatsData, ComparisonEntry, parseStats, ShareState } from '@ns/core';
 import './styles.css';
 
@@ -143,14 +144,6 @@ function App() {
       setTimeout(preload, 200);
     }
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (showSaveDialog()) setShowSaveDialog(false);
-        if (showManageSnapshots()) setShowManageSnapshots(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-
     const handleAnalysisPaste = (e: ClipboardEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
@@ -170,10 +163,7 @@ function App() {
     };
     document.addEventListener('paste', handleAnalysisPaste);
 
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('paste', handleAnalysisPaste);
-    };
+    onCleanup(() => document.removeEventListener('paste', handleAnalysisPaste));
   });
 
   // Debounced save to localStorage
@@ -406,52 +396,45 @@ function App() {
             <Show when={currentStats()}>
               <Analysis stats={currentStats()!} precision={precision()} />
               <Show when={showSaveDialog()}>
-                <div class="modal-overlay" onClick={() => setShowSaveDialog(false)}>
-                  <div class="modal" onClick={e => e.stopPropagation()}>
-                    <h3>Save Snapshot</h3>
-                    <input
-                      type="text"
-                      class="snapshot-name-input"
-                      placeholder="Enter snapshot name..."
-                      value={snapshotName()}
-                      onInput={e => setSnapshotName(e.currentTarget.value)}
-                      onKeyDown={e => e.key === 'Enter' && saveSnapshot()}
-                      autofocus
-                    />
-                    <div class="modal-actions">
-                      <button class="cancel-btn" onClick={() => setShowSaveDialog(false)}>
-                        Cancel
-                      </button>
-                      <button class="confirm-btn" onClick={saveSnapshot}>
-                        Save
-                      </button>
-                    </div>
+                <Modal title="Save Snapshot" onClose={() => setShowSaveDialog(false)}>
+                  <input
+                    type="text"
+                    class="snapshot-name-input"
+                    placeholder="Enter snapshot name..."
+                    value={snapshotName()}
+                    onInput={e => setSnapshotName(e.currentTarget.value)}
+                    onKeyDown={e => e.key === 'Enter' && saveSnapshot()}
+                    data-autofocus
+                  />
+                  <div class="modal-actions">
+                    <button class="cancel-btn" onClick={() => setShowSaveDialog(false)}>
+                      Cancel
+                    </button>
+                    <button class="confirm-btn" onClick={saveSnapshot}>
+                      Save
+                    </button>
                   </div>
-                </div>
+                </Modal>
               </Show>
               <Show when={showOverrideModal()}>
-                <div class="modal-overlay" onClick={() => setShowOverrideModal(false)}>
-                  <div class="modal" onClick={e => e.stopPropagation()}>
-                    <h3>Override Analysis?</h3>
-                    <p style={{ color: 'var(--text-secondary)', 'margin-bottom': '1rem' }}>
-                      This will replace the current analysis with pasted data.
-                    </p>
-                    <div class="modal-actions">
-                      <button class="cancel-btn" onClick={() => setShowOverrideModal(false)}>
-                        Cancel
-                      </button>
-                      <button
-                        class="confirm-btn"
-                        onClick={() => {
-                          loadFromText(pendingOverrideText());
-                          setShowOverrideModal(false);
-                        }}
-                      >
-                        Override
-                      </button>
-                    </div>
+                <Modal title="Override Analysis?" onClose={() => setShowOverrideModal(false)}>
+                  <p class="modal-text">This will replace the current analysis with pasted data.</p>
+                  <div class="modal-actions">
+                    <button class="cancel-btn" onClick={() => setShowOverrideModal(false)}>
+                      Cancel
+                    </button>
+                    <button
+                      class="confirm-btn"
+                      data-autofocus
+                      onClick={() => {
+                        loadFromText(pendingOverrideText());
+                        setShowOverrideModal(false);
+                      }}
+                    >
+                      Override
+                    </button>
                   </div>
-                </div>
+                </Modal>
               </Show>
             </Show>
           </Show>
@@ -497,42 +480,39 @@ function App() {
       </footer>
 
       <Show when={showManageSnapshots()}>
-        <div class="modal-overlay" onClick={() => setShowManageSnapshots(false)}>
-          <div class="modal modal-large" onClick={e => e.stopPropagation()}>
-            <div class="modal-header">
-              <h3>Manage Snapshots</h3>
-              <button class="close-btn" onClick={() => setShowManageSnapshots(false)}>
-                <XIcon size={20} />
+        <Modal
+          title="Manage Snapshots"
+          onClose={() => setShowManageSnapshots(false)}
+          large
+          closeButton
+        >
+          <div class="snapshot-list-manage">
+            <For each={snapshots()} fallback={<div class="empty-state">No snapshots saved</div>}>
+              {entry => (
+                <div class="snapshot-manage-item">
+                  <div class="snapshot-info" onClick={() => loadSnapshot(entry)}>
+                    <span class="snapshot-name">{entry.name}</span>
+                    <span class="snapshot-date">
+                      {new Date(entry.timestamp).toLocaleDateString()}{' '}
+                      {new Date(entry.timestamp).toLocaleTimeString()}
+                    </span>
+                  </div>
+                  <button class="delete-btn" onClick={() => deleteSnapshot(entry.id)}>
+                    <XIcon size={16} />
+                  </button>
+                </div>
+              )}
+            </For>
+          </div>
+          <Show when={snapshots().length > 0}>
+            <div class="modal-actions">
+              <button class="danger-btn" onClick={clearAllSnapshots}>
+                <Trash2Icon size={16} />
+                Clear All
               </button>
             </div>
-            <div class="snapshot-list-manage">
-              <For each={snapshots()} fallback={<div class="empty-state">No snapshots saved</div>}>
-                {entry => (
-                  <div class="snapshot-manage-item">
-                    <div class="snapshot-info" onClick={() => loadSnapshot(entry)}>
-                      <span class="snapshot-name">{entry.name}</span>
-                      <span class="snapshot-date">
-                        {new Date(entry.timestamp).toLocaleDateString()}{' '}
-                        {new Date(entry.timestamp).toLocaleTimeString()}
-                      </span>
-                    </div>
-                    <button class="delete-btn" onClick={() => deleteSnapshot(entry.id)}>
-                      <XIcon size={16} />
-                    </button>
-                  </div>
-                )}
-              </For>
-            </div>
-            <Show when={snapshots().length > 0}>
-              <div class="modal-actions">
-                <button class="danger-btn" onClick={clearAllSnapshots}>
-                  <Trash2Icon size={16} />
-                  Clear All
-                </button>
-              </div>
-            </Show>
-          </div>
-        </div>
+          </Show>
+        </Modal>
       </Show>
 
       <Show when={currentStats() && view() === 'analysis'}>

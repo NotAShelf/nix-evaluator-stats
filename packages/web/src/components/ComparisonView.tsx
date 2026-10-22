@@ -7,6 +7,7 @@ import ArrowUpIcon from 'lucide-solid/icons/arrow-up';
 import XIcon from 'lucide-solid/icons/x';
 import ShareIcon from 'lucide-solid/icons/share';
 import FileUpload from './FileUpload';
+import Modal from './Modal';
 
 interface ComparisonViewProps {
   entries: ComparisonEntry[];
@@ -32,6 +33,11 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
   const [pasteError, setPasteError] = createSignal('');
   const [pasteName, setPasteName] = createSignal('');
   const [pendingPasteText, setPendingPasteText] = createSignal('');
+
+  const closePasteModal = () => {
+    setShowPasteModal(false);
+    setPasteError('');
+  };
 
   const handlePaste = (e: ClipboardEvent) => {
     const target = e.target as HTMLElement;
@@ -376,54 +382,28 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
       </Show>
 
       <Show when={showPasteModal()}>
-        <div
-          class="modal-overlay"
-          onClick={() => {
-            setShowPasteModal(false);
-            setPasteError('');
-          }}
-        >
-          <div class="modal" onClick={e => e.stopPropagation()}>
-            <div class="modal-header">
-              <h3>Paste Statistics</h3>
-              <button
-                class="close-btn"
-                onClick={() => {
-                  setShowPasteModal(false);
-                  setPasteError('');
-                }}
-              >
-                <XIcon size={20} />
-              </button>
-            </div>
-            <input
-              type="text"
-              class="snapshot-name-input"
-              placeholder="Enter snapshot name..."
-              value={pasteName()}
-              onInput={e => setPasteName(e.currentTarget.value)}
-              onKeyDown={e => e.key === 'Enter' && confirmPaste()}
-              autofocus
-            />
-            <Show when={pasteError()}>
-              <div class="error">{pasteError()}</div>
-            </Show>
-            <div class="modal-actions">
-              <button
-                class="cancel-btn"
-                onClick={() => {
-                  setShowPasteModal(false);
-                  setPasteError('');
-                }}
-              >
-                Cancel
-              </button>
-              <button class="confirm-btn" onClick={confirmPaste}>
-                {props.entries.length >= 2 ? 'Save & Compare' : 'Save Snapshot'}
-              </button>
-            </div>
+        <Modal title="Paste Statistics" onClose={closePasteModal} closeButton>
+          <input
+            type="text"
+            class="snapshot-name-input"
+            placeholder="Enter snapshot name..."
+            value={pasteName()}
+            onInput={e => setPasteName(e.currentTarget.value)}
+            onKeyDown={e => e.key === 'Enter' && confirmPaste()}
+            data-autofocus
+          />
+          <Show when={pasteError()}>
+            <div class="error">{pasteError()}</div>
+          </Show>
+          <div class="modal-actions">
+            <button class="cancel-btn" onClick={closePasteModal}>
+              Cancel
+            </button>
+            <button class="confirm-btn" onClick={confirmPaste}>
+              {props.entries.length >= 2 ? 'Save & Compare' : 'Save Snapshot'}
+            </button>
           </div>
-        </div>
+        </Modal>
       </Show>
     </div>
   );

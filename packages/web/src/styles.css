@@ -440,6 +440,10 @@ body {
   min-width: 360px;
 }
 
+.modal:focus {
+  outline: none;
+}
+
 .modal-large {
   min-width: 480px;
   max-width: 90vw;
@@ -448,15 +452,17 @@ body {
   flex-direction: column;
 }
 
+.modal-text {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   margin-bottom: 1.5rem;
-}
-
-.modal-header h3 {
-  margin-bottom: 0;
 }
 
 .close-btn {
@@ -478,7 +484,6 @@ body {
 }
 
 .modal h3 {
-  margin-bottom: 1.5rem;
   font-size: 1.125rem;
 }
 
