@@ -133,6 +133,16 @@ function App() {
       setIsLoading(false);
     }
 
+    const preload = () => {
+      Analysis.preload();
+      ComparisonView.preload();
+    };
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(preload);
+    } else {
+      setTimeout(preload, 200);
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (showSaveDialog()) setShowSaveDialog(false);
