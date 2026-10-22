@@ -19,5 +19,6 @@ export default defineConfig({
   build: {
     target: 'esnext',
     outDir: 'dist',
+    modulePreload: { polyfill: false },
   },
 });
