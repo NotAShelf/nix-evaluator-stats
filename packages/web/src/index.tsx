@@ -41,7 +41,7 @@ function App() {
   const [isLoading, setIsLoading] = createSignal(true);
   const [showOverrideModal, setShowOverrideModal] = createSignal(false);
   const [pendingOverrideText, setPendingOverrideText] = createSignal('');
-  const [showShareToast, setShowShareToast] = createSignal(false);
+  const [toastMessage, setToastMessage] = createSignal('');
   const [initialLeftId, setInitialLeftId] = createSignal<number | null>(null);
   const [initialRightId, setInitialRightId] = createSignal<number | null>(null);
 
@@ -226,16 +226,23 @@ function App() {
     setShowSaveDialog(false);
   };
 
+  let toastTimer: ReturnType<typeof setTimeout> | undefined;
+  const showToast = (message: string) => {
+    clearTimeout(toastTimer);
+    setToastMessage(message);
+    toastTimer = setTimeout(() => setToastMessage(''), 2500);
+  };
+
   const copyShareUrl = async (state: ShareState) => {
     try {
       const { encodeShareUrl } = await loadShare();
       const encoded = encodeShareUrl(state);
       const url = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
       await navigator.clipboard.writeText(url);
-      setShowShareToast(true);
-      setTimeout(() => setShowShareToast(false), 2000);
+      showToast('Share URL copied to clipboard!');
     } catch (err) {
       console.error('Failed to copy share URL:', err);
+      showToast('Failed to copy share URL');
     }
   };
 
@@ -533,9 +540,9 @@ function App() {
         </div>
       </Show>
 
-      <Show when={showShareToast()}>
-        <div class="toast">Share URL copied to clipboard!</div>
-      </Show>
+      <div class="toast" classList={{ visible: !!toastMessage() }} role="status" aria-live="polite">
+        {toastMessage()}
+      </div>
     </div>
   );
 }

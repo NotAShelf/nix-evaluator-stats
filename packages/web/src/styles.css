@@ -1650,7 +1650,13 @@ body {
   font-size: 0.875rem;
   box-shadow: var(--shadow);
   z-index: 1000;
+  max-width: calc(100vw - 2rem);
+  text-align: center;
   animation: toast-in 0.2s ease;
+}
+
+.toast:not(.visible) {
+  display: none;
 }
 
 @keyframes toast-in {
