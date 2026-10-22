@@ -825,35 +825,33 @@ ol {
   font-size: 0.75rem;
   color: var(--text-secondary);
   white-space: normal;
-  max-width: 280px;
   width: max-content;
+  max-width: min(280px, calc(100vw - 1rem));
   z-index: 1000;
   box-shadow: var(--shadow);
   pointer-events: none;
   word-wrap: break-word;
 }
 
+.tooltip:not(.visible) {
+  display: none;
+}
+
 .tooltip::after {
   content: '';
   position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   border: 6px solid transparent;
 }
 
-.tooltip:not([data-position='top'])::after {
+.tooltip[data-position='top']::after {
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
   border-top-color: var(--border-color);
 }
 
-.tooltip[data-position='bottom'] {
-  transform: translateX(-50%) translateY(8px);
-}
-
 .tooltip[data-position='bottom']::after {
-  top: auto;
   bottom: 100%;
-  border-top-color: transparent;
   border-bottom-color: var(--border-color);
 }
 

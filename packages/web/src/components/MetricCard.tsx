@@ -1,4 +1,4 @@
-import { Component, createSignal, Show } from 'solid-js';
+import { Component, createSignal, createUniqueId, Show } from 'solid-js';
 
 interface MetricCardProps {
   label: string;
@@ -7,72 +7,64 @@ interface MetricCardProps {
   highlight?: boolean;
 }
 
+const TOOLTIP_WIDTH = 280;
+const MARGIN = 8;
+const MIN_SPACE_ABOVE = 72;
+
 const MetricCard: Component<MetricCardProps> = props => {
-  const [showTooltip, setShowTooltip] = createSignal(false);
+  const tooltipId = createUniqueId();
   const [tooltipPos, setTooltipPos] = createSignal<{
-    top: number;
+    top?: number;
+    bottom?: number;
     left: number;
     position: 'top' | 'bottom';
   } | null>(null);
   let cardRef: HTMLDivElement | undefined;
 
-  const updateTooltipPosition = () => {
-    if (!cardRef || !showTooltip()) {
-      setTooltipPos(null);
-      return;
-    }
+  const show = () => {
+    if (!cardRef || !props.tooltip) return;
 
     const rect = cardRef.getBoundingClientRect();
-    const tooltipHeight = 60;
-    const tooltipWidth = 280;
-    const margin = 8;
-
-    const spaceAbove = rect.top;
-    const spaceBelow = window.innerHeight - rect.bottom;
-
-    const position: 'top' | 'bottom' =
-      spaceAbove >= tooltipHeight + margin || spaceBelow < tooltipHeight + margin
-        ? 'top'
-        : 'bottom';
-    const top = position === 'top' ? rect.top - tooltipHeight - margin : rect.bottom + margin;
+    const halfWidth = Math.min(TOOLTIP_WIDTH, window.innerWidth - MARGIN * 2) / 2;
     const left = Math.max(
-      margin,
-      Math.min(
-        rect.left + rect.width / 2 - tooltipWidth / 2,
-        window.innerWidth - tooltipWidth - margin,
-      ),
+      MARGIN + halfWidth,
+      Math.min(rect.left + rect.width / 2, window.innerWidth - MARGIN - halfWidth),
     );
 
-    setTooltipPos({ top, left, position });
+    if (rect.top >= MIN_SPACE_ABOVE) {
+      setTooltipPos({ bottom: window.innerHeight - rect.top + MARGIN, left, position: 'top' });
+    } else {
+      setTooltipPos({ top: rect.bottom + MARGIN, left, position: 'bottom' });
+    }
   };
 
-  const handleMouseEnter = () => {
-    setShowTooltip(true);
-    updateTooltipPosition();
-  };
-
-  const handleMouseLeave = () => {
-    setShowTooltip(false);
-    setTooltipPos(null);
-  };
+  const hide = () => setTooltipPos(null);
 
   return (
     <div
       ref={cardRef}
       class={`metric-card ${props.highlight ? 'highlight' : ''}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onMouseMove={updateTooltipPosition}
+      tabIndex={props.tooltip ? 0 : undefined}
+      aria-describedby={props.tooltip ? tooltipId : undefined}
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onFocus={show}
+      onBlur={hide}
+      onKeyDown={e => e.key === 'Escape' && hide()}
     >
       <div class="metric-value">{props.value}</div>
       <div class="metric-label">{props.label}</div>
-      <Show when={props.tooltip && tooltipPos()}>
+      <Show when={props.tooltip}>
         <div
+          id={tooltipId}
+          role="tooltip"
           class="tooltip"
+          classList={{ visible: !!tooltipPos() }}
           data-position={tooltipPos()?.position}
           style={{
-            top: `${tooltipPos()?.top}px`,
-            left: `${tooltipPos()?.left}px`,
+            top: tooltipPos()?.top !== undefined ? `${tooltipPos()!.top}px` : 'auto',
+            bottom: tooltipPos()?.bottom !== undefined ? `${tooltipPos()!.bottom}px` : 'auto',
+            left: `${tooltipPos()?.left ?? 0}px`,
           }}
         >
           {props.tooltip}
