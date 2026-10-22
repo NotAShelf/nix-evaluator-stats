@@ -1,4 +1,13 @@
-import { Component, For, createSignal, createMemo, Show, onMount, onCleanup } from 'solid-js';
+import {
+  Component,
+  For,
+  createSignal,
+  createMemo,
+  createUniqueId,
+  Show,
+  onMount,
+  onCleanup,
+} from 'solid-js';
 import { ComparisonEntry, calculateChange, StatsData } from '@ns/core';
 import { formatBytes, formatNumber, formatTime, formatPercent } from '@ns/ui-utils';
 import ArrowRightIcon from 'lucide-solid/icons/arrow-right';
@@ -33,6 +42,8 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
   const [pasteError, setPasteError] = createSignal('');
   const [pasteName, setPasteName] = createSignal('');
   const [pendingPasteText, setPendingPasteText] = createSignal('');
+  const leftSelectId = createUniqueId();
+  const rightSelectId = createUniqueId();
 
   const closePasteModal = () => {
     setShowPasteModal(false);
@@ -183,29 +194,30 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
       <Show when={props.entries.length >= 2}>
         <div class="comparison-controls">
           <div class="compare-selector">
-            <label>Baseline</label>
-            <select onChange={selectLeft} value={leftEntry()?.id || ''}>
+            <label for={leftSelectId}>Baseline</label>
+            <select id={leftSelectId} onChange={selectLeft} value={leftEntry()?.id || ''}>
               <option value="">Select snapshot...</option>
               <For each={props.entries}>
                 {entry => <option value={entry.id}>{entry.name}</option>}
               </For>
             </select>
           </div>
-          <div class="compare-arrow">
+          <div class="compare-arrow" aria-hidden="true">
             <ArrowRightIcon size={20} />
           </div>
           <div class="compare-selector">
-            <label>Current</label>
-            <select onChange={selectRight} value={rightEntry()?.id || ''}>
+            <label for={rightSelectId}>Current</label>
+            <select id={rightSelectId} onChange={selectRight} value={rightEntry()?.id || ''}>
               <option value="">Select snapshot...</option>
               <For each={props.entries}>
                 {entry => <option value={entry.id}>{entry.name}</option>}
               </For>
             </select>
           </div>
-          <div class="compare-paste-toggle">
+          <div class="compare-paste-toggle" role="group" aria-label="Paste mode">
             <button
               class={props.pasteMode === 'advance' ? 'active' : ''}
+              aria-pressed={props.pasteMode === 'advance'}
               onClick={() => props.onPasteModeChange('advance')}
               title="Paste shifts current to baseline"
             >
@@ -213,6 +225,7 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
             </button>
             <button
               class={props.pasteMode === 'replace' ? 'active' : ''}
+              aria-pressed={props.pasteMode === 'replace'}
               onClick={() => props.onPasteModeChange('replace')}
               title="Paste replaces current only"
             >
@@ -225,7 +238,7 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
               onClick={() => props.onGenerateShareUrl(leftEntry()!, rightEntry()!)}
               title="Copy share URL to clipboard"
             >
-              <ShareIcon size={16} />
+              <ShareIcon size={16} aria-hidden="true" />
               Share
             </button>
           </Show>
@@ -235,16 +248,22 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
       <Show when={props.entries.length > 0}>
         <div class="snapshots-list">
           <h4>Saved Snapshots</h4>
-          <For each={props.entries}>
-            {entry => (
-              <div class="snapshot-item">
-                <span class="snapshot-name">{entry.name}</span>
-                <button class="delete-btn" onClick={() => props.onDelete(entry.id)}>
-                  <XIcon size={16} />
-                </button>
-              </div>
-            )}
-          </For>
+          <ul>
+            <For each={props.entries}>
+              {entry => (
+                <li class="snapshot-item">
+                  <span class="snapshot-name">{entry.name}</span>
+                  <button
+                    class="delete-btn"
+                    onClick={() => props.onDelete(entry.id)}
+                    aria-label={`Delete ${entry.name}`}
+                  >
+                    <XIcon size={16} aria-hidden="true" />
+                  </button>
+                </li>
+              )}
+            </For>
+          </ul>
         </div>
       </Show>
 
@@ -279,22 +298,31 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
             </div>
           }
         >
-          <div class="comparison-table">
-            <div class="compare-header">
-              <div class="col-label">Metric</div>
-              <div class="col-value">{leftEntry()?.name}</div>
-              <div class="col-value">{rightEntry()?.name}</div>
-              <div class="col-change">Change</div>
+          <div class="comparison-table" role="table" aria-label="Snapshot comparison">
+            <div class="compare-header" role="row">
+              <div class="col-label" role="columnheader">
+                Metric
+              </div>
+              <div class="col-value" role="columnheader">
+                {leftEntry()?.name}
+              </div>
+              <div class="col-value" role="columnheader">
+                {rightEntry()?.name}
+              </div>
+              <div class="col-change" role="columnheader">
+                Change
+              </div>
             </div>
             <For each={comparison()}>
               {row => (
                 <div
                   class={`compare-row ${row.isDifferent ? 'diff' : ''} ${row.isMissing ? 'missing' : ''}`}
+                  role="row"
                 >
-                  <div class="col-label" title={row.label}>
+                  <div class="col-label" title={row.label} role="rowheader">
                     {row.label}
                   </div>
-                  <div class="col-value">
+                  <div class="col-value" role="cell">
                     <Show
                       when={row.isMissing}
                       fallback={
@@ -310,7 +338,7 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
                       <span class="missing-value">N/A</span>
                     </Show>
                   </div>
-                  <div class="col-value">
+                  <div class="col-value" role="cell">
                     <Show
                       when={row.isMissing}
                       fallback={
@@ -328,17 +356,27 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
                   </div>
                   <div
                     class={`col-change ${row.isReduction ? 'good' : row.isDifferent && !row.isMissing ? 'bad' : ''}`}
+                    role="cell"
                   >
                     <Show
                       when={row.isMissing}
                       fallback={
-                        <Show when={row.isDifferent} fallback={<span class="neutral">—</span>}>
+                        <Show
+                          when={row.isDifferent}
+                          fallback={
+                            <span class="neutral" aria-label="No change">
+                              -
+                            </span>
+                          }
+                        >
                           <span class="change-value">
                             <Show when={row.isReduction}>
-                              <ArrowDownIcon size={14} />
+                              <ArrowDownIcon size={14} aria-hidden="true" />
+                              <span class="sr-only">Decreased by </span>
                             </Show>
                             <Show when={!row.isReduction}>
-                              <ArrowUpIcon size={14} />
+                              <ArrowUpIcon size={14} aria-hidden="true" />
+                              <span class="sr-only">Increased by </span>
                             </Show>
                             {parseFloat(
                               (
@@ -364,16 +402,16 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
             </For>
           </div>
 
-          <div class="comparison-summary">
+          <div class="comparison-summary" role="status">
             <Show when={comparison()?.some(r => r.isReduction)}>
               <div class="summary-good">
-                <ArrowDownIcon size={16} />{' '}
+                <ArrowDownIcon size={16} aria-hidden="true" />{' '}
                 {comparison()?.filter(r => r.isReduction && r.isDifferent).length} improved
               </div>
             </Show>
             <Show when={comparison()?.some(r => !r.isReduction && r.isDifferent)}>
               <div class="summary-bad">
-                <ArrowUpIcon size={16} />{' '}
+                <ArrowUpIcon size={16} aria-hidden="true" />{' '}
                 {comparison()?.filter(r => !r.isReduction && r.isDifferent).length} regressed
               </div>
             </Show>
@@ -387,13 +425,16 @@ const ComparisonView: Component<ComparisonViewProps> = props => {
             type="text"
             class="snapshot-name-input"
             placeholder="Enter snapshot name..."
+            aria-label="Snapshot name"
             value={pasteName()}
             onInput={e => setPasteName(e.currentTarget.value)}
             onKeyDown={e => e.key === 'Enter' && confirmPaste()}
             data-autofocus
           />
           <Show when={pasteError()}>
-            <div class="error">{pasteError()}</div>
+            <div class="error" role="alert">
+              {pasteError()}
+            </div>
           </Show>
           <div class="modal-actions">
             <button class="cancel-btn" onClick={closePasteModal}>

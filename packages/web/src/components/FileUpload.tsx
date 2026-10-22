@@ -44,7 +44,7 @@ export default function FileUpload(props: FileUploadProps) {
   return (
     <div class="upload-container">
       <div class="upload-card">
-        <div class="upload-icon">
+        <div class="upload-icon" aria-hidden="true">
           <BarChart2Icon size={48} />
         </div>
         <h2>Load Statistics</h2>
@@ -70,10 +70,18 @@ export default function FileUpload(props: FileUploadProps) {
         </Show>
 
         <div class="upload-mode-toggle">
-          <button class={!isTextMode() ? 'active' : ''} onClick={() => setIsTextMode(false)}>
+          <button
+            class={!isTextMode() ? 'active' : ''}
+            aria-pressed={!isTextMode()}
+            onClick={() => setIsTextMode(false)}
+          >
             File
           </button>
-          <button class={isTextMode() ? 'active' : ''} onClick={() => setIsTextMode(true)}>
+          <button
+            class={isTextMode() ? 'active' : ''}
+            aria-pressed={isTextMode()}
+            onClick={() => setIsTextMode(true)}
+          >
             Paste
           </button>
         </div>
@@ -88,6 +96,9 @@ export default function FileUpload(props: FileUploadProps) {
         <Show when={isTextMode()}>
           <textarea
             class="json-input"
+            aria-label="Statistics JSON"
+            placeholder="Paste NIX_SHOW_STATS output here..."
+            spellcheck={false}
             value={textInput()}
             onInput={e => setTextInput(e.currentTarget.value)}
             onPaste={e => {
@@ -109,13 +120,15 @@ export default function FileUpload(props: FileUploadProps) {
         </Show>
 
         <Show when={error()}>
-          <div class="error">{error()}</div>
+          <div class="error" role="alert">
+            {error()}
+          </div>
         </Show>
 
         <Show when={props.snapshots && props.snapshots.length > 0}>
           <div class="recent-analyses">
             <h3>
-              <ClockIcon size={16} />
+              <ClockIcon size={16} aria-hidden="true" />
               Recent Analyses
             </h3>
             <ul class="snapshot-list">

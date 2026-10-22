@@ -354,11 +354,19 @@ function App() {
         <div class="header-left">
           <h1>NS</h1>
         </div>
-        <nav class="nav">
-          <button class={view() === 'analysis' ? 'active' : ''} onClick={() => setView('analysis')}>
+        <nav class="nav" aria-label="Views">
+          <button
+            class={view() === 'analysis' ? 'active' : ''}
+            aria-pressed={view() === 'analysis'}
+            onClick={() => setView('analysis')}
+          >
             Analysis
           </button>
-          <button class={view() === 'compare' ? 'active' : ''} onClick={() => setView('compare')}>
+          <button
+            class={view() === 'compare' ? 'active' : ''}
+            aria-pressed={view() === 'compare'}
+            onClick={() => setView('compare')}
+          >
             Compare ({snapshots().length})
           </button>
           <Show when={snapshots().length > 0}>
@@ -366,8 +374,9 @@ function App() {
               class={showManageSnapshots() ? 'active' : ''}
               onClick={() => setShowManageSnapshots(true)}
               title="Manage Snapshots"
+              aria-label="Manage snapshots"
             >
-              <Trash2Icon size={16} />
+              <Trash2Icon size={16} aria-hidden="true" />
             </button>
           </Show>
           <select
@@ -375,6 +384,7 @@ function App() {
             value={precision()}
             onChange={e => setPrecision(parseInt(e.currentTarget.value, 10))}
             title="Decimal Precision"
+            aria-label="Decimal precision"
           >
             <For each={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}>
               {p => <option value={p}>{p} dp</option>}
@@ -385,8 +395,8 @@ function App() {
 
       <main class="main">
         <Show when={isLoading()}>
-          <div class="loading">
-            <div class="spinner"></div>
+          <div class="loading" role="status">
+            <div class="spinner" aria-hidden="true"></div>
             <span>Loading saved data...</span>
           </div>
         </Show>
@@ -408,6 +418,7 @@ function App() {
                     type="text"
                     class="snapshot-name-input"
                     placeholder="Enter snapshot name..."
+                    aria-label="Snapshot name"
                     value={snapshotName()}
                     onInput={e => setSnapshotName(e.currentTarget.value)}
                     onKeyDown={e => e.key === 'Enter' && saveSnapshot()}
@@ -476,12 +487,7 @@ function App() {
           rel="noopener noreferrer"
           class="footer-link"
         >
-          <img
-            src={`${import.meta.env.BASE_URL}assets/github.svg`}
-            alt="GitHub"
-            width={16}
-            height={16}
-          />
+          <img src={`${import.meta.env.BASE_URL}assets/github.svg`} alt="" width={16} height={16} />
           Source
         </a>
       </footer>
@@ -504,8 +510,12 @@ function App() {
                       {new Date(entry.timestamp).toLocaleTimeString()}
                     </span>
                   </button>
-                  <button class="delete-btn" onClick={() => deleteSnapshot(entry.id)}>
-                    <XIcon size={16} />
+                  <button
+                    class="delete-btn"
+                    onClick={() => deleteSnapshot(entry.id)}
+                    aria-label={`Delete ${entry.name}`}
+                  >
+                    <XIcon size={16} aria-hidden="true" />
                   </button>
                 </li>
               )}
@@ -514,7 +524,7 @@ function App() {
           <Show when={snapshots().length > 0}>
             <div class="modal-actions">
               <button class="danger-btn" onClick={clearAllSnapshots}>
-                <Trash2Icon size={16} />
+                <Trash2Icon size={16} aria-hidden="true" />
                 Clear All
               </button>
             </div>
@@ -523,19 +533,30 @@ function App() {
       </Show>
 
       <Show when={currentStats() && view() === 'analysis'}>
-        <div class="floating-actions">
+        <div class="floating-actions" role="toolbar" aria-label="Analysis actions">
           <button
             class="action-btn save"
             onClick={() => setShowSaveDialog(true)}
             title="Save Snapshot"
+            aria-label="Save snapshot"
           >
-            <SaveIcon size={20} />
+            <SaveIcon size={20} aria-hidden="true" />
           </button>
-          <button class="action-btn share" onClick={shareAnalysis} title="Share Analysis">
-            <ShareIcon size={20} />
+          <button
+            class="action-btn share"
+            onClick={shareAnalysis}
+            title="Share Analysis"
+            aria-label="Copy share URL"
+          >
+            <ShareIcon size={20} aria-hidden="true" />
           </button>
-          <button class="action-btn clear" onClick={() => setCurrentStats(null)} title="Load New">
-            <UploadIcon size={20} />
+          <button
+            class="action-btn clear"
+            onClick={() => setCurrentStats(null)}
+            title="Load New"
+            aria-label="Load new statistics"
+          >
+            <UploadIcon size={20} aria-hidden="true" />
           </button>
         </div>
       </Show>
