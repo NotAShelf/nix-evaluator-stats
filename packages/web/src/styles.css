@@ -1,13 +1,16 @@
 :root {
+  color-scheme: dark;
   --bg-primary: #0f0f12;
   --bg-secondary: #18181b;
   --bg-tertiary: #27272a;
   --border-color: #3f3f46;
   --text-primary: #e4e4e7;
   --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
+  --text-muted: #8e8e98;
+  --text-tertiary: #8e8e98;
   --accent: #6366f1;
   --accent-hover: #818cf8;
+  --accent-text: #818cf8;
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -53,6 +56,11 @@ textarea {
 ul,
 ol {
   list-style: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-hover);
+  outline-offset: 2px;
 }
 
 .sr-only {
@@ -301,8 +309,11 @@ ol {
 }
 
 .json-input:focus {
-  outline: none;
   border-color: var(--accent);
+}
+
+.json-input:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .load-btn {
@@ -533,8 +544,11 @@ ol {
 }
 
 .snapshot-name-input:focus {
-  outline: none;
   border-color: var(--accent);
+}
+
+.snapshot-name-input:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .modal-actions {
@@ -658,7 +672,7 @@ ol {
 
 /* Help Link */
 .help-link {
-  color: var(--accent);
+  color: var(--accent-text);
   font-size: 0.875rem;
   cursor: pointer;
   margin-bottom: 2rem;
@@ -695,7 +709,7 @@ ol {
   border-radius: 0.375rem;
   font-family: 'SF Mono', Monaco, monospace;
   font-size: 0.75rem;
-  color: var(--accent);
+  color: var(--accent-text);
   margin-bottom: 0.5rem;
 }
 
@@ -1391,8 +1405,11 @@ ol {
 }
 
 .compare-selector select:focus {
-  outline: none;
   border-color: var(--accent);
+}
+
+.compare-selector select:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .compare-arrow {
@@ -1680,8 +1697,11 @@ ol {
 }
 
 .precision-select:focus {
-  outline: none;
   border-color: var(--accent);
+}
+
+.precision-select:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .toast {
