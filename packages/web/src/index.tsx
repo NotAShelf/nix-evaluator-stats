@@ -486,7 +486,12 @@ function App() {
           rel="noopener noreferrer"
           class="footer-link"
         >
-          <img src="/assets/github.svg" alt="GitHub" width={16} height={16} />
+          <img
+            src={`${import.meta.env.BASE_URL}assets/github.svg`}
+            alt="GitHub"
+            width={16}
+            height={16}
+          />
           Source
         </a>
       </footer>
