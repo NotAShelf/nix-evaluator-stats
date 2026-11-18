@@ -61,6 +61,6 @@ jobs:
           git diff
 
       - name: Update dependencies
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: stefanzweifel/git-auto-commit-action@v7.1.0
         with:
           commit_message: "meta: auto-update dependencies"
